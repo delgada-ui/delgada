@@ -21,12 +21,18 @@ async function main() {
 
 async function compile(entryPoint, buildDirectory) {
   let [html, css, js] = await buildOutput(entryPoint, {});
-  html = cleanUpPass(html);
-  css = cleanUpPass(css);
-  js = cleanUpPass(js);
-  writeToBuild(html, buildDirectory, 'index.html');
-  writeToBuild(css, buildDirectory, 'index.css');
-  writeToBuild(js, buildDirectory, 'index.js');
+  if (html.length > 0) {
+    html = cleanUpPass(html);
+    writeToBuild(html, buildDirectory, 'index.html');
+  }
+  if (css.length > 0) {
+    css = cleanUpPass(css);
+    writeToBuild(css, buildDirectory, 'index.css');
+  }
+  if (js.length > 0) {
+    js = cleanUpPass(js);
+    writeToBuild(js, buildDirectory, 'index.js');
+  }
 }
 
 async function buildOutput(path, attrs) {
