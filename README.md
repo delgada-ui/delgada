@@ -1,3 +1,3 @@
 # poppyhtml
 
-A very tiny compiler for writing vanilla web technologies with the ergonomics and composability of a modern frontend framework.
+A tiny compiler for writing vanilla HTML, CSS, and JavaScript with the ergonomics and composability of a modern frontend framework.
