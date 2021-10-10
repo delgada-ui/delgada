@@ -1,0 +1,17 @@
+{
+  "name": "poppyhtml",
+  "version": "0.0.1",
+  "description": "Vanilla web technologies with the ergonomics of a modern frontend framework.",
+  "author": "Hawk Ticehurst",
+  "license": "MIT",
+  "main": "index.js",
+  "bin": {
+    "poppyhtml": "index.js"
+  },
+  "scripts": {},
+  "keywords": [],
+  "dependencies": {},
+  "devDependencies": {
+    "prettier": "^2.4.1"
+  }
+}
