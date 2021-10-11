@@ -8,9 +8,6 @@
   "bin": {
     "poppyhtml": "index.js"
   },
-  "scripts": {},
-  "keywords": [],
-  "dependencies": {},
   "devDependencies": {
     "prettier": "^2.4.1"
   }
