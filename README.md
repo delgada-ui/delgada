@@ -22,3 +22,7 @@ npm start
 ## Documentation
 
 _Coming soon-ish._
+
+## License
+
+[MIT](LICENSE)
