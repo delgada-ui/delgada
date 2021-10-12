@@ -82,9 +82,8 @@ async function buildOutput(path, attrs) {
           .join('/');
         const componentFile =
           relativeComponentPathList[relativeComponentPathList.length - 1];
-        const componentName = componentFile.substring(
-          0,
-          componentFile.length - 5
+        const componentName = capitalizeFirstLetter(
+          componentFile.substring(0, componentFile.length - 5)
         );
         // Add component name and component root path to components object
         components[componentName] = componentRootPath;
@@ -202,6 +201,10 @@ function getComponentAttrs(line) {
     }
   }
   return componentAttrs;
+}
+
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function copyFileSync(source, target) {
