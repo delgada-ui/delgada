@@ -4,7 +4,7 @@
 [![NPM Minified Size](https://img.shields.io/bundlephobia/min/poppyhtml)](https://bundlephobia.com/package/poppyhtml@latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)](./LICENSE)
 
-_❗️ Warning: This is not production ready software and is currently in very active development. ❗️_
+_❗️ Warning: This is not production ready software and is in very active development. ❗️_
 
 A tiny compiler for writing vanilla HTML, CSS, and JavaScript with the ergonomics and composability of a modern frontend framework.
 
