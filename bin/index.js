@@ -53,25 +53,25 @@ async function buildOutput(path, attrs) {
   let cssFlag = false;
   let jsFlag = false;
 
-  for await (const line of rl) {
+  for await (const fullLine of rl) {
+    const line = fullLine.trim();
     if (cssFlag) {
-      if (line.trim() === '</style>') {
+      if (line === '</style>') {
         cssFlag = false;
       } else {
-        cssOutput += line.trim() + '\n';
+        cssOutput += line + '\n';
       }
     } else if (jsFlag) {
-      if (line.trim() === '</script>') {
+      if (line === '</script>') {
         jsFlag = false;
       } else {
-        jsOutput += line.trim() + '\n';
+        jsOutput += line + '\n';
       }
     } else {
-      if (line.trim().substring(0, 6) === 'import') {
+      if (line.substring(0, 6) === 'import') {
         // Get an array of the relative component path
         // striped of quotes and split on '/'
         const relativeComponentPathList = line
-          .trim()
           .split(' ')[1]
           .trim()
           .replace(/['"]+/g, '')
@@ -92,14 +92,14 @@ async function buildOutput(path, attrs) {
         );
         // Add component name and component root path to components object
         components[componentName] = componentRootPath;
-      } else if (isComponent(line.trim(), components)) {
-        const name = getComponentName(line.trim());
-        const attrs = getComponentAttrs(line.trim());
+      } else if (isComponent(line, components)) {
+        const name = getComponentName(line);
+        const attrs = getComponentAttrs(line);
         const [html, css, js] = await buildOutput(components[name], attrs);
         htmlOutput += html;
         cssOutput += css;
         jsOutput += js;
-      } else if (hasAttrToken(line.trim(), attrs)) {
+      } else if (hasAttrToken(line, attrs)) {
         for (const attrName in attrs) {
           const attrToken = `{${attrName}}`;
           const attrValue = attrs[attrName];
@@ -107,12 +107,12 @@ async function buildOutput(path, attrs) {
             htmlOutput += line.replace(attrToken, attrValue) + '\n';
           }
         }
-      } else if (line.trim() === '<style>') {
+      } else if (line === '<style>') {
         cssFlag = true;
-      } else if (line.trim() === '<script>') {
+      } else if (line === '<script>') {
         jsFlag = true;
       } else {
-        htmlOutput += line.trim() + '\n';
+        htmlOutput += line + '\n';
       }
     }
   }
