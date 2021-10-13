@@ -12,6 +12,8 @@ async function main() {
   del(buildDirectory);
   create(buildDirectory);
 
+  console.log('\nCompiling source code...\n');
+
   await compile(entryPoint, buildDirectory);
 
   if (assetDirectory) {
