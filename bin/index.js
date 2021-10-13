@@ -12,13 +12,15 @@ async function main() {
   del(buildDirectory);
   create(buildDirectory);
 
-  console.log('\nCompiling source code...\n');
+  console.log('\nCompiling source code...');
 
   await compile(entryPoint, buildDirectory);
 
   if (assetDirectory) {
     copyFolderRecursiveSync(assetDirectory, buildDirectory);
   }
+
+  console.log('Build created 🎉\n');
 }
 
 async function compile(entryPoint, buildDirectory) {
