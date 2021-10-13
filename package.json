@@ -4,9 +4,9 @@
   "description": "A tiny compiler for writing vanilla html, css, and js with the ergonomics of a modern frontend framework.",
   "author": "Hawk Ticehurst",
   "license": "MIT",
-  "main": "index.js",
+  "main": "bin/index.js",
   "bin": {
-    "poppyhtml": "index.js"
+    "poppyhtml": "bin/index.js"
   },
   "devDependencies": {
     "prettier": "^2.4.1"
