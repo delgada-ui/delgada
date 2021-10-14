@@ -1,31 +1,36 @@
 'use strict';
-const fs = require('fs');
-const readline = require('readline');
-const { writeToBuild } = require('../utils/fileio');
+const {
+  createReadlineInterface,
+  writeToBuildDirectory,
+} = require('../utils/fileio');
 
 async function compile(entryPoint, buildDirectory) {
+  // Compile and build source code into separate HTML, CSS, and JS outputs
   let [html, css, js] = await buildOutput(entryPoint, {}, []);
+
+  // If HTML output was created do a clean up pass and write the
+  // content to an index.html file in the build directory
   if (html.length > 0) {
     html = cleanUpPass(html);
-    writeToBuild(html, buildDirectory, 'index.html');
+    writeToBuildDirectory(html, buildDirectory, 'index.html');
   }
+
+  // If CSS output was created do a clean up pass and write the
+  // content to an index.css file in the build directory
   if (css.length > 0) {
     css = cleanUpPass(css);
-    writeToBuild(css, buildDirectory, 'index.css');
+    writeToBuildDirectory(css, buildDirectory, 'index.css');
   }
+
+  // If JavaScript output was created do a clean up pass and write the
+  // content to an index.js file in the build directory
   if (js.length > 0) {
     js = cleanUpPass(js);
-    writeToBuild(js, buildDirectory, 'index.js');
+    writeToBuildDirectory(js, buildDirectory, 'index.js');
   }
 }
 
-async function buildOutput(path, attrs, childElements) {
-  const fileStream = fs.createReadStream(path);
-  const rl = readline.createInterface({
-    input: fileStream,
-    crlfDelay: Infinity,
-  });
-
+async function buildOutput(path, props, childElements) {
   const importedComponents = {};
   let htmlOutput = '';
   let cssOutput = '';
@@ -34,90 +39,79 @@ async function buildOutput(path, attrs, childElements) {
   let jsFlag = false;
   let closingComponent = '';
   let isMultilineComponent = false;
-  let componentAttrs = {};
+  let componentProps = {};
 
+  // Create a file stream and readline interface in order
+  // to process the given file one line at a time
+  const rl = createReadlineInterface(path);
+
+  // Loop through every line in the given file
   for await (const fullLine of rl) {
     const line = fullLine.trim();
-    if (cssFlag) {
-      if (line === '</style>') {
-        cssFlag = false;
-      } else {
-        cssOutput += line + '\n';
-      }
-    } else if (jsFlag) {
+
+    if (jsFlag) {
       if (line === '</script>') {
         jsFlag = false;
       } else {
         jsOutput += line + '\n';
       }
+    } else if (cssFlag) {
+      if (line === '</style>') {
+        cssFlag = false;
+      } else {
+        cssOutput += line + '\n';
+      }
     } else {
-      if (line.substring(0, 6) === 'import') {
-        saveImportedComponents(line, path, importedComponents);
+      if (isImportStatement(line)) {
+        saveImportedComponent(line, path, importedComponents);
+      } else if (isComponent(line, importedComponents)) {
+        const componentName = getComponentName(line, importedComponents);
+        const componentFilePath = importedComponents[componentName];
+        componentProps = getcomponentProps(line);
+        isMultilineComponent = !line.includes('/>');
+
+        if (!isMultilineComponent || line === closingComponent) {
+          const [html, css, js] = await buildOutput(
+            componentFilePath,
+            componentProps,
+            childElements
+          );
+          htmlOutput += html;
+          cssOutput += css;
+          jsOutput += js;
+          componentProps = {};
+        }
+        if (line === closingComponent) {
+          isMultilineComponent = false;
+          closingComponent = '';
+        }
+        if (isMultilineComponent) {
+          closingComponent = `</${componentName}>`;
+        }
+      } else if (hasPropExpression(line, props)) {
+        htmlOutput += replacePropExpressionWithPropValue(line, props);
       } else if (isMultilineComponent && line !== closingComponent) {
         if (isComponent(line, importedComponents)) {
+          console.log(line);
           const name = getComponentName(line, importedComponents);
-          componentAttrs = getComponentAttrs(line);
+          componentProps = getcomponentProps(line);
           const [html, css, js] = await buildOutput(
             importedComponents[name],
-            componentAttrs,
+            componentProps,
             childElements
           );
           childElements = childElements.concat(html.split('\n'));
           cssOutput += css;
           jsOutput += js;
-          componentAttrs = {};
+          componentProps = {};
         } else {
           childElements.push(line);
         }
-      } else if (line === '<slot />') {
+      } else if (isSlotElement(line)) {
         for (const element of childElements) {
           htmlOutput += element + '\n';
         }
         childElements = [];
-      } else if (isComponent(line, importedComponents)) {
-        isMultilineComponent =
-          line.substring(line.length - 2, line.length) !== '/>';
-        const isEndComponent = line.substring(0, 2) === '</';
-
-        const name = getComponentName(line, importedComponents);
-        componentAttrs = getComponentAttrs(line);
-
-        if (isMultilineComponent) {
-          closingComponent = `</${name}>`;
-        }
-
-        if (!isMultilineComponent) {
-          const [html, css, js] = await buildOutput(
-            importedComponents[name],
-            componentAttrs,
-            childElements
-          );
-          htmlOutput += html;
-          cssOutput += css;
-          jsOutput += js;
-          componentAttrs = {};
-        }
-
-        if (isEndComponent) {
-          const [html, css, js] = await buildOutput(
-            importedComponents[name],
-            componentAttrs,
-            childElements
-          );
-          htmlOutput += html;
-          cssOutput += css;
-          jsOutput += js;
-          isMultilineComponent = false;
-          componentAttrs = {};
-        }
-      } else if (hasAttrToken(line, attrs)) {
-        for (const attrName in attrs) {
-          const attrToken = `{${attrName}}`;
-          const attrValue = attrs[attrName];
-          if (line.includes(attrToken)) {
-            htmlOutput += line.replace(attrToken, attrValue) + '\n';
-          }
-        }
       } else if (line === '<style>') {
         cssFlag = true;
       } else if (line === '<script>') {
@@ -133,10 +127,18 @@ async function buildOutput(path, attrs, childElements) {
 
 // ----- Helper Functions -----
 
-function saveImportedComponents(line, path, importedComponents) {
+function isImportStatement(line) {
+  return line.startsWith('import');
+}
+
+function saveImportedComponent(line, path, importedComponents) {
   const componentRootPath = getComponentPathFromProjectRoot(line, path);
   const componentName = getComponentNameFromFilePath(componentRootPath);
   importedComponents[componentName] = componentRootPath;
+}
+
+function isSlotElement(line) {
+  return line === '<slot />';
 }
 
 function getComponentPathFromProjectRoot(line, path) {
@@ -197,27 +199,40 @@ function getComponentName(line, importedComponents) {
 //   title="Hello World!"
 //   title="Hello World!"
 // />
-function getComponentAttrs(line) {
-  const componentAttrs = {};
+function getcomponentProps(line) {
+  const componentProps = {};
   const attrList = line.match(/[a-z]+\=["']{1}.*?["']{1}/g);
   if (attrList) {
     for (const part of attrList) {
       const attrAndVal = part.split('=');
       const attr = attrAndVal[0];
       const val = attrAndVal[1].replace(/['"]+/g, '');
-      componentAttrs[attr] = val;
+      componentProps[attr] = val;
     }
   }
-  return componentAttrs;
+  return componentProps;
 }
 
-function hasAttrToken(line, attrs) {
-  for (const attrName in attrs) {
-    if (line.includes(`{${attrName}}`)) {
+// Checks if the given line contains a prop expression
+// which takes the form of: {prop}
+function hasPropExpression(line, props) {
+  for (const propName in props) {
+    if (line.includes(`{${propName}}`)) {
       return true;
     }
   }
   return false;
+}
+
+function replacePropExpressionWithPropValue(line, props) {
+  for (const propName in props) {
+    const propExpression = `{${propName}}`;
+    if (line.includes(propExpression)) {
+      const propValue = props[propName];
+      return line.replace(propExpression, propValue) + '\n';
+    }
+  }
+  return line;
 }
 
 function cleanUpPass(code) {
@@ -226,7 +241,7 @@ function cleanUpPass(code) {
   for (const line of lines) {
     if (line === '<!--' || line === '-->' || line === '') {
       // Do nothing
-      // Note: This bit of code means that multiline HTML comments are not possible¡
+      // Note: This bit of code means that multiline HTML comments are not possible
     } else {
       output += line + '\n';
     }
