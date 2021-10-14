@@ -1,6 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
+function clear(path) {
+  del(path);
+  create(path);
+}
+
 function del(path) {
   if (fs.existsSync(path) && fs.lstatSync(path).isDirectory()) {
     fs.readdirSync(path).forEach(function (file, index) {
@@ -34,7 +39,7 @@ function copyFileSync(source, target) {
   fs.writeFileSync(targetFile, fs.readFileSync(source));
 }
 
-function copyFolderRecursiveSync(source, target) {
+function copyDir(source, target) {
   var files = [];
 
   // Check if folder needs to be created or integrated
@@ -67,8 +72,7 @@ function writeToBuild(output, buildDirectory, file) {
 }
 
 module.exports = {
-  create,
-  copyFolderRecursiveSync,
-  del,
+  clear,
+  copyDir,
   writeToBuild,
 };
