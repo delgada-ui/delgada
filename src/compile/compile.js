@@ -81,8 +81,6 @@ async function buildOutput(path, props, childElements) {
           closingComponent = `</${componentName}>`;
           multilineComponentProps = componentProps;
         }
-      } else if (hasPropExpression(line, props)) {
-        htmlOutput += replacePropExpressionWithPropValue(line, props);
       } else if (isMultilineComponent && line !== closingComponent) {
         if (isComponent(line, importedComponents)) {
           const name = getComponentName(line, importedComponents);
@@ -98,6 +96,8 @@ async function buildOutput(path, props, childElements) {
         } else {
           childElements.push(line);
         }
+      } else if (hasPropExpression(line, props)) {
+        htmlOutput += replacePropExpressionWithPropValue(line, props);
       } else if (isSlotElement(line)) {
         for (const element of childElements) {
           htmlOutput += element + '\n';
