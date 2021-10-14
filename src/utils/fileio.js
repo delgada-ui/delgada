@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 
 function clear(path) {
   del(path);
@@ -71,8 +72,19 @@ function writeToBuildDirectory(output, buildDirectory, file) {
   });
 }
 
+function createReadlineInterface(path) {
+  const fileStream = fs.createReadStream(path);
+  const rl = readline.createInterface({
+    input: fileStream,
+    crlfDelay: Infinity,
+  });
+
+  return rl;
+}
+
 module.exports = {
   clear,
   copyDir,
+  createReadlineInterface,
   writeToBuildDirectory,
 };
