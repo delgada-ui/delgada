@@ -8,22 +8,14 @@ async function compile(entryPoint, buildDirectory) {
   // Compile and build source code into separate HTML, CSS, and JS outputs
   let [html, css, js] = await buildOutput(entryPoint, {}, []);
 
-  // If HTML output was created do a clean up pass and write the
-  // content to an index.html file in the build directory
   if (html.length > 0) {
     html = cleanUpPass(html);
     writeToBuildDirectory(html, buildDirectory, 'index.html');
   }
-
-  // If CSS output was created do a clean up pass and write the
-  // content to an index.css file in the build directory
   if (css.length > 0) {
     css = cleanUpPass(css);
     writeToBuildDirectory(css, buildDirectory, 'index.css');
   }
-
-  // If JavaScript output was created do a clean up pass and write the
-  // content to an index.js file in the build directory
   if (js.length > 0) {
     js = cleanUpPass(js);
     writeToBuildDirectory(js, buildDirectory, 'index.js');
@@ -39,7 +31,7 @@ async function buildOutput(path, props, childElements) {
   let jsFlag = false;
   let closingComponent = '';
   let isMultilineComponent = false;
-  let componentProps = {};
+  let multilineComponentProps = {};
 
   // Create a file stream and readline interface in order
   // to process the given file one line at a time
@@ -67,34 +59,34 @@ async function buildOutput(path, props, childElements) {
       } else if (isComponent(line, importedComponents)) {
         const componentName = getComponentName(line, importedComponents);
         const componentFilePath = importedComponents[componentName];
-        componentProps = getcomponentProps(line);
+        const componentProps = getcomponentProps(line);
         isMultilineComponent = !line.includes('/>');
 
         if (!isMultilineComponent || line === closingComponent) {
           const [html, css, js] = await buildOutput(
             componentFilePath,
-            componentProps,
+            !isMultilineComponent ? componentProps : multilineComponentProps,
             childElements
           );
           htmlOutput += html;
           cssOutput += css;
           jsOutput += js;
-          componentProps = {};
         }
         if (line === closingComponent) {
           isMultilineComponent = false;
           closingComponent = '';
+          multilineComponentProps = {};
         }
         if (isMultilineComponent) {
           closingComponent = `</${componentName}>`;
+          multilineComponentProps = componentProps;
         }
       } else if (hasPropExpression(line, props)) {
         htmlOutput += replacePropExpressionWithPropValue(line, props);
       } else if (isMultilineComponent && line !== closingComponent) {
         if (isComponent(line, importedComponents)) {
-          console.log(line);
           const name = getComponentName(line, importedComponents);
-          componentProps = getcomponentProps(line);
+          const componentProps = getcomponentProps(line);
           const [html, css, js] = await buildOutput(
             importedComponents[name],
             componentProps,
@@ -103,7 +95,6 @@ async function buildOutput(path, props, childElements) {
           childElements = childElements.concat(html.split('\n'));
           cssOutput += css;
           jsOutput += js;
-          componentProps = {};
         } else {
           childElements.push(line);
         }
