@@ -62,7 +62,7 @@ function copyDir(source, target) {
   }
 }
 
-function writeToBuild(output, buildDirectory, file) {
+function writeToBuildDirectory(output, buildDirectory, file) {
   fs.appendFile(`${buildDirectory}/${file}`, output, (err) => {
     if (err) {
       console.error(err);
@@ -74,5 +74,5 @@ function writeToBuild(output, buildDirectory, file) {
 module.exports = {
   clear,
   copyDir,
-  writeToBuild,
+  writeToBuildDirectory,
 };
