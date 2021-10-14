@@ -4,7 +4,7 @@ const readline = require('readline');
 const { writeToBuild } = require('../utils/fileio');
 
 async function compile(entryPoint, buildDirectory) {
-  let [html, css, js] = await buildOutput(entryPoint, {});
+  let [html, css, js] = await buildOutput(entryPoint, {}, []);
   if (html.length > 0) {
     html = cleanUpPass(html);
     writeToBuild(html, buildDirectory, 'index.html');
@@ -19,19 +19,22 @@ async function compile(entryPoint, buildDirectory) {
   }
 }
 
-async function buildOutput(path, attrs) {
+async function buildOutput(path, attrs, childElements) {
   const fileStream = fs.createReadStream(path);
   const rl = readline.createInterface({
     input: fileStream,
     crlfDelay: Infinity,
   });
 
-  const components = {};
+  const importedComponents = {};
   let htmlOutput = '';
   let cssOutput = '';
   let jsOutput = '';
   let cssFlag = false;
   let jsFlag = false;
+  let closingComponent = '';
+  let isMultilineComponent = false;
+  let componentAttrs = {};
 
   for await (const fullLine of rl) {
     const line = fullLine.trim();
@@ -49,36 +52,64 @@ async function buildOutput(path, attrs) {
       }
     } else {
       if (line.substring(0, 6) === 'import') {
-        // Get an array of the relative component path
-        // striped of quotes and split on '/'
-        const relativeComponentPathList = line
-          .split(' ')[1]
-          .trim()
-          .replace(/['"]+/g, '')
-          .split('/');
-        const rootPathList = path.split('/');
-        const rootPathListWithoutFile = rootPathList.slice(
-          0,
-          rootPathList.length - 1
-        );
-        const componentRootPath = rootPathListWithoutFile
-          .concat(relativeComponentPathList)
-          .join('/');
-        const componentFile =
-          relativeComponentPathList[relativeComponentPathList.length - 1];
-        const componentName = componentFile.substring(
-          0,
-          componentFile.length - 5
-        );
-        // Add component name and component root path to components object
-        components[componentName] = componentRootPath;
-      } else if (isComponent(line, components)) {
-        const name = getComponentName(line);
-        const attrs = getComponentAttrs(line);
-        const [html, css, js] = await buildOutput(components[name], attrs);
-        htmlOutput += html;
-        cssOutput += css;
-        jsOutput += js;
+        saveImportedComponents(line, path, importedComponents);
+      } else if (isMultilineComponent && line !== closingComponent) {
+        if (isComponent(line, importedComponents)) {
+          const name = getComponentName(line, importedComponents);
+          componentAttrs = getComponentAttrs(line);
+          const [html, css, js] = await buildOutput(
+            importedComponents[name],
+            componentAttrs,
+            childElements
+          );
+          childElements = childElements.concat(html.split('\n'));
+          cssOutput += css;
+          jsOutput += js;
+          componentAttrs = {};
+        } else {
+          childElements.push(line);
+        }
+      } else if (line === '<slot />') {
+        for (const element of childElements) {
+          htmlOutput += element + '\n';
+        }
+        childElements = [];
+      } else if (isComponent(line, importedComponents)) {
+        isMultilineComponent =
+          line.substring(line.length - 2, line.length) !== '/>';
+        const isEndComponent = line.substring(0, 2) === '</';
+
+        const name = getComponentName(line, importedComponents);
+        componentAttrs = getComponentAttrs(line);
+
+        if (isMultilineComponent) {
+          closingComponent = `</${name}>`;
+        }
+
+        if (!isMultilineComponent) {
+          const [html, css, js] = await buildOutput(
+            importedComponents[name],
+            componentAttrs,
+            childElements
+          );
+          htmlOutput += html;
+          cssOutput += css;
+          jsOutput += js;
+          componentAttrs = {};
+        }
+
+        if (isEndComponent) {
+          const [html, css, js] = await buildOutput(
+            importedComponents[name],
+            componentAttrs,
+            childElements
+          );
+          htmlOutput += html;
+          cssOutput += css;
+          jsOutput += js;
+          isMultilineComponent = false;
+          componentAttrs = {};
+        }
       } else if (hasAttrToken(line, attrs)) {
         for (const attrName in attrs) {
           const attrToken = `{${attrName}}`;
@@ -102,17 +133,61 @@ async function buildOutput(path, attrs) {
 
 // ----- Helper Functions -----
 
-function isComponent(line, components) {
-  const name = getComponentName(line);
-  return components.hasOwnProperty(name);
+function saveImportedComponents(line, path, importedComponents) {
+  const componentRootPath = getComponentPathFromProjectRoot(line, path);
+  const componentName = getComponentNameFromFilePath(componentRootPath);
+  importedComponents[componentName] = componentRootPath;
 }
 
-function getComponentName(line) {
-  const componentPartsList = line.split(' ');
-  const componentName = componentPartsList[0]
-    .substring(1, componentPartsList[0].length)
-    .trim();
+function getComponentPathFromProjectRoot(line, path) {
+  // Get an array of the relative component path
+  // striped of quotes and split on '/'
+  const relativeComponentPathList = line
+    .split(' ')[1]
+    .trim()
+    .replace(/['"]+/g, '')
+    .split('/');
+  const rootPathList = path.split('/');
+  const rootPathListWithoutFile = rootPathList.slice(
+    0,
+    rootPathList.length - 1
+  );
+  const componentRootPath = rootPathListWithoutFile
+    .concat(relativeComponentPathList)
+    .join('/')
+    .replace(/(\.\/|\.\.\/)*/g, '');
+
+  return componentRootPath;
+}
+
+function getComponentNameFromFilePath(path) {
+  const pathList = path.split('/');
+  const componentFile = pathList[pathList.length - 1];
+  const componentName = componentFile.substring(0, componentFile.length - 5);
+
   return componentName;
+}
+
+function isComponent(line, importedComponents) {
+  for (const componentName in importedComponents) {
+    if (line.includes(componentName)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function getComponentName(line, importedComponents) {
+  for (const componentName in importedComponents) {
+    if (line.includes(componentName)) {
+      return componentName;
+    }
+  }
+  // const componentPartsList = line.split(' ');
+  // const componentName = componentPartsList[0]
+  //   .substring(1, componentPartsList[0].length)
+  //   .trim();
+  // return componentName;
 }
 
 // <hello title="Hello World!" />
