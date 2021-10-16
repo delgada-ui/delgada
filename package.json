@@ -10,5 +10,8 @@
   },
   "devDependencies": {
     "prettier": "^2.4.1"
+  },
+  "dependencies": {
+    "node-html-parser": "^5.0.0"
   }
 }

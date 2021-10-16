@@ -1,7 +1,5 @@
-#!/usr/bin/env node
-'use strict';
-const { compile } = require('./compile/compile');
-const { clear, copyDir } = require('./utils/fileio');
+const { clear, copyDir } = require('./utils');
+const { compile } = require('./compile');
 
 async function main() {
   // Get command line arguments
@@ -14,7 +12,6 @@ async function main() {
 
   console.log('\nCompiling source code...');
 
-  // Compile and build the source code
   await compile(entryPoint, buildDirectory);
 
   // If an asset directory path was given, copy
