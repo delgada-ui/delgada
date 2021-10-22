@@ -1,5 +1,17 @@
 ## Documentation
 
+The syntax and functionality of PoppyHTML is intentionally small and concise. 
+
+It operates within the confines of standard HTML syntax and simply seeks to enable some of the hallmarks of modern frontend frameworks such as: 
+
+- A familiar component format
+- Basic data passing via component props
+- An intuitive templating syntax
+- Very basic component-scoped CSS and JavaScript, 
+- And a few more things
+
+PoppyHTML is best used for building small (mostly) static websites. You won't find any fancy diffing algorithms, virtual doms, reactive data, stateful components, or declarative syntax here. It's just plain old imperative vanilla HTML, CSS, and JavaScript that can be organized and structured in a way that is far more composable and easy to reason about.
+
 Below is a quick overview of some of the major parts of PoppyHTML, along with a list of future goals towards the bottom.
 
 ### Component Format
