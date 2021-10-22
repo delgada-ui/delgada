@@ -118,7 +118,9 @@ Below is a simple counter component example that demonstrates component logic an
 </style>
 ```
 
-Again, it worth noting that currently logic and styles are compiled and built into JavaScript and CSS files that live in the global scope. This means you are responsible for things such as wrapping JS code in an event listener that waits for the DOM to load before running logic. It also means that while the above button styling works for this component any other `<button>` element in other files will pick up this styling.
+Again, it worth noting that currently logic and styles are compiled and built into JavaScript and CSS files that live in the global scope. 
+
+This means you are responsible for things such as wrapping JS code in an event listener that waits for the DOM to load before running component logic. It also means that while the above button styling works for this component, any `<button>` element in other files will pick up this styling.
 
 Eventually this will change, but for now it's your responsibility to keep track of these details.
 
