@@ -22,13 +22,13 @@ Components are written in plain old `.html` files and have a basic structure tha
 
 ```html
 <script>
-    // optional component logic goes here
+  // optional component logic goes here
 </script>
 
 <!-- component markup goes here -->
 
 <style>
-    /* optional component styles go here */
+  /* optional component styles go here */
 </style>
 ```
 
@@ -36,10 +36,10 @@ To use a component in another `.html` file, you simple add a multiline comment a
 
 ```html
 <!-- 
-    import './path/to/mycomponent.html'
+  import './path/to/mycomponent.html'
  -->
 
- <mycomponent />
+<mycomponent />
 ```
 
 Some important things to note about this are that: 
