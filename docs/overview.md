@@ -1,8 +1,8 @@
 ## Documentation
 
-The syntax and functionality of PoppyHTML is intentionally small and concise. 
+The syntax and functionality of PoppyHTML is intentionally small and concise.
 
-It operates within the confines of standard HTML syntax and simply seeks to enable some of the hallmarks of modern frontend frameworks, such as: 
+It operates within the confines of standard HTML syntax and simply seeks to enable some of the hallmarks of modern frontend frameworks, such as:
 
 - A familiar component format
 - Basic data passing via component props
@@ -42,7 +42,7 @@ To use a component in another `.html` file, you simple add a multiline comment a
 <mycomponent />
 ```
 
-Some important things to note about this are that: 
+Some important things to note about this are that:
 
 - The file name (i.e. `mycomponent.html`) and component (i.e `<mycomponent />`) must be the same
 - Component names must be lowercase to match the syntax standards of vanilla HTML
@@ -85,10 +85,8 @@ Below is a simple counter component example that demonstrates component logic an
 
 ```html
 <script>
-  window.addEventListener('load', () => {
-    const button = document.querySelector('button');
-    button.addEventListener('click', incremementCount);
-  });
+  const button = document.querySelector('button');
+  button.addEventListener('click', incremementCount);
 
   function incremementCount() {
     const countSpan = document.getElementById('count');
@@ -118,11 +116,17 @@ Below is a simple counter component example that demonstrates component logic an
 </style>
 ```
 
-Again, it worth noting that currently logic and styles are compiled and built into JavaScript and CSS files that live in the global scope. 
+An important detail to know is that component logic is automatically wrapped in the following code:
 
-This means you are responsible for things such as wrapping JS code in an event listener that waits for the DOM to load before running component logic. It also means that while the above button styling works for this component, any `<button>` element in other files will pick up this styling.
+```javascript
+window.addEventListener('load', () => {
+  // ... component logic ...
+});
+```
 
-Eventually this will change, but for now it's your responsibility to keep track of these details.
+This is included so that component logic will not run until the DOM has been loaded. Without it, the above snippet of code would have to be manually included in every component script.
+
+At this time, there is no way to opt out of this behavior but in the future there will be `<script>` attribute implemented so component logic can be run in the global scope.
 
 ### Future Functionality, Syntax, and Tooling
 
