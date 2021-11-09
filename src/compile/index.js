@@ -12,6 +12,7 @@ async function compile(entryPoint, buildDirectory) {
     writeToBuildDirectory(css, buildDirectory, 'index.css');
   }
   if (js.length > 0) {
+    js = wrapJavaScriptInDOMLoad(js);
     writeToBuildDirectory(js, buildDirectory, 'index.js');
   }
 }
@@ -144,6 +145,14 @@ function getComponentNameFromFilePath(path) {
   const componentName = componentFile.substring(0, componentFile.length - 5);
 
   return componentName;
+}
+
+function wrapJavaScriptInDOMLoad(js) {
+  return `
+    window.addEventListener('load', () => {
+      ${js}
+    });
+  `;
 }
 
 module.exports = {
