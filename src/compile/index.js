@@ -54,13 +54,17 @@ async function buildOutput(path, componentProps) {
           let subtreeHTML = node.outerHTML;
           for (const componentName in importedComponents) {
             if (node.structure.includes(componentName)) {
-              const componentNodeList = node.getElementsByTagName(componentName);
+              const componentNodeList =
+                node.getElementsByTagName(componentName);
               for (const componentNode of componentNodeList) {
                 const componentName = componentNode.rawTagName;
                 const componentFilePath = importedComponents[componentName];
                 const props = componentNode.attributes;
 
-                const [html, css, js] = await buildOutput(componentFilePath, props);
+                const [html, css, js] = await buildOutput(
+                  componentFilePath,
+                  props
+                );
 
                 const componentNodeHTML = componentNode.outerHTML;
                 subtreeHTML = subtreeHTML.replace(componentNodeHTML, html);
@@ -116,9 +120,16 @@ function saveImportedComponent(commentText, path, importedComponents) {
 function getComponentPathFromProjectRoot(line, path) {
   // Get an array of the relative component path
   // striped of quotes and split on '/'
-  const relativeComponentPathList = line.split(' ')[1].trim().replace(/['"]+/g, '').split('/');
+  const relativeComponentPathList = line
+    .split(' ')[1]
+    .trim()
+    .replace(/['"]+/g, '')
+    .split('/');
   const rootPathList = path.split('/');
-  const rootPathListWithoutFile = rootPathList.slice(0, rootPathList.length - 1);
+  const rootPathListWithoutFile = rootPathList.slice(
+    0,
+    rootPathList.length - 1
+  );
   const componentRootPath = rootPathListWithoutFile
     .concat(relativeComponentPathList)
     .join('/')
