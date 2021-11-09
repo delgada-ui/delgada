@@ -12,13 +12,13 @@ async function main() {
 
   console.log('\nCompiling source code...');
 
-  await compile(entryPoint, buildDirectory);
-
   // If an asset directory path was given, copy
   // its contents into the build directory
   if (assetDirectory) {
     copyDir(assetDirectory, buildDirectory);
   }
+
+  await compile(entryPoint, buildDirectory);
 
   console.log('Build created 🎉\n');
 }
