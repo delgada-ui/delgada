@@ -6,11 +6,13 @@
 
 _❗️ Warning: This is not production ready software and is in very active development. ❗️_
 
-A tiny compiler for writing vanilla HTML, CSS, and JavaScript with the ergonomics and composability of a modern frontend framework.
+## What is PoppyHTML?
 
-## Usage
+PoppyHTML is a small frontend compiler that enables developers to write vanilla HTML, CSS, and JavaScript with similar ergonomics and composability to a modern frontend framework.
 
-Install the [project template](https://github.com/hawkticehurst/poppyhtml-template) to scaffold out a new project.
+## Getting Started
+
+To quickly get up and running you can install the [project template](https://github.com/hawkticehurst/poppyhtml-template) to scaffold out a new project.
 
 ```
 npx degit hawkticehurst/poppyhtml-template {your-project-name}
@@ -21,7 +23,7 @@ npm start
 
 ## Documentation
 
-_Coming soon-ish._
+Read a [high level overview](./docs/overview.md) of the current syntax and functionality available in PoppyHTML.
 
 ## License
 
