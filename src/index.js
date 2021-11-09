@@ -9,7 +9,8 @@ async function main() {
     assetDirectory,
   ] = getCommandLineArguments();
 
-  // Clear the build directory if it exists
+  // Clear the build directory if it exists and
+  // create a new build directory if it does not
   clear(buildDirectory);
 
   // If an asset directory path was given, copy
