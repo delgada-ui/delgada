@@ -126,7 +126,7 @@ window.addEventListener('load', () => {
 
 This is included so that component logic will not run until the DOM has been loaded. Without it, the above snippet of code would have to be manually included in every component script.
 
-At this time, there is no way to opt out of this behavior but in the future there will be `<script>` attribute implemented so component logic can be run in the global scope.
+At this time, there is no way to opt out of this behavior but in the future there will be a `<script>` attribute implemented so component logic can be run in the global scope.
 
 ### Future Functionality, Syntax, and Tooling
 
