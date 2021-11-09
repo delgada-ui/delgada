@@ -1,6 +1,6 @@
 {
   "name": "poppyhtml",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "A tiny compiler for writing vanilla html, css, and js with the ergonomics of a modern frontend framework.",
   "author": "Hawk Ticehurst",
   "license": "MIT",
