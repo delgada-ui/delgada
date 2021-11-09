@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const { clear, copyDir, getCommandLineArguments } = require('./utils');
 const { compile } = require('./compile');
 
