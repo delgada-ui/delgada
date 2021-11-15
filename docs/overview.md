@@ -1,6 +1,6 @@
 ## Documentation
 
-The syntax and functionality of PoppyHTML is intentionally small and concise.
+The syntax and functionality of Delgada is intentionally small and concise.
 
 It operates within the confines of standard HTML syntax and simply seeks to enable some of the hallmarks of modern frontend frameworks, such as:
 
@@ -10,13 +10,13 @@ It operates within the confines of standard HTML syntax and simply seeks to enab
 - Very basic component-scoped CSS and JavaScript
 - A few more things
 
-PoppyHTML is best used for building small (mostly) static websites. You won't find any fancy diffing algorithms, virtual doms, reactive data, stateful components, or declarative syntax here. It's just plain vanilla HTML, CSS, and JavaScript that can be organized and structured in a way that is far more composable and easy to reason about.
+Delgada is best used for building small (mostly) static websites. You won't find any fancy diffing algorithms, virtual doms, reactive data, stateful components, or declarative syntax here. It's just plain vanilla HTML, CSS, and JavaScript that can be organized and structured in a way that is far more composable and easy to reason about.
 
-Below is a quick overview of some of the major parts of PoppyHTML, along with a list of future goals towards the bottom.
+Below is a quick overview of some of the major parts of Delgada, along with a list of future goals towards the bottom.
 
 ### Component Format
 
-The PoppyHTML component format takes heavy inspiration from that of [Svelte](https://svelte.dev/), [Vue](https://vuejs.org/), and [HTMLx](https://github.com/htmlx-org/HTMLx) syntax.
+The Delgada component format takes heavy inspiration from that of [Svelte](https://svelte.dev/), [Vue](https://vuejs.org/), and [HTMLx](https://github.com/htmlx-org/HTMLx) syntax.
 
 Components are written in plain old `.html` files and have a basic structure that looks like the following:
 
@@ -51,7 +51,7 @@ Some important things to note about this are that:
 
 ### Component Props and Template Syntax
 
-Very rudimentary data passing and templating syntax is also possible in PoppyHTML.
+Very rudimentary data passing and templating syntax is also possible in Delgada.
 
 Props take the exact same form as HTML attributes––the difference is simply in semantics, components have props, while HTML elements have attributes.
 
@@ -130,14 +130,14 @@ At this time, there is no way to opt out of this behavior but in the future ther
 
 ### Future Functionality, Syntax, and Tooling
 
-Below is a list of future functionality and syntax that are being considered for PoppyHTML.
+Below is a list of future functionality and syntax that are being considered for Delgada.
 
 - Nested component children using the `<slot />` element
 - Multiple nested component children using named slots
 - Component scoped CSS / JS
 - Multipage website compilation (potentially using a `routes` page directory structure?)
 - Improve output code quality
-- New project creation using `npm init poppyhtml` command
+- New project creation using `npm init delgada` command
 - Rebuild the compiler and CLI using the Rust programming language
 - Ship built-in dev server/file watcher?
 - Ship built-in code formatter?

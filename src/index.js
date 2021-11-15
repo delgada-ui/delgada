@@ -20,7 +20,7 @@ async function main() {
     copyDir(assetDirectory, buildDirectory);
   }
 
-  // Compile and build PoppyHTML
+  // Compile and build source code
   await compile(entryPoint, buildDirectory);
 
   console.log('Build created 🎉\n');

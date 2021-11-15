@@ -1,12 +1,12 @@
 {
-  "name": "poppyhtml",
-  "version": "0.0.14",
-  "description": "A tiny compiler for writing vanilla html, css, and js with the ergonomics of a modern frontend framework.",
+  "name": "delgada",
+  "version": "0.1.0",
+  "description": "A small frontend compiler for writing vanilla HTML, CSS, and JavaScript with the ergonomics of a modern frontend framework.",
   "author": "Hawk Ticehurst",
   "license": "MIT",
   "main": "src/index.js",
   "bin": {
-    "poppyhtml": "src/index.js"
+    "delgada": "src/index.js"
   },
   "devDependencies": {
     "prettier": "^2.4.1"
