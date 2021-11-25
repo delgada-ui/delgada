@@ -12,11 +12,11 @@ Delgada is a small frontend compiler that enables developers to write vanilla HT
 
 ## Getting Started
 
-To quickly get up and running you can install the [project template](https://github.com/hawkticehurst/Delgada-template) to scaffold out a new project.
+To quickly get up and running you can install the [project template](https://github.com/delgada-ui/template) to scaffold out a new project.
 
 ```
-npx degit hawkticehurst/delgada-template {your-project-name}
-cd {your-project-name}
+npx degit delgada-ui/template my-delgada-project
+cd my-delgada-project
 npm install
 npm start
 ```
