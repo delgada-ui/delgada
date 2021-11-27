@@ -1,7 +1,6 @@
 # Delgada
 
 [![NPM Version](https://img.shields.io/npm/v/delgada?color=blue)](https://www.npmjs.com/package/delgada)
-[![NPM Minified Size](https://img.shields.io/bundlephobia/min/delgada)](https://bundlephobia.com/package/delgada@latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)](./LICENSE)
 
 _❗️ Warning: This is not production ready software and is in very active development. ❗️_

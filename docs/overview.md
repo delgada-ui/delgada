@@ -132,13 +132,11 @@ At this time, there is no way to opt out of this behavior but in the future ther
 
 Below is a list of future functionality and syntax that are being considered for Delgada.
 
+- Rebuild the compiler using the Rust programming language
 - Nested component children using the `<slot />` element
 - Multiple nested component children using named slots
-- Component scoped CSS / JS
-- Multipage website compilation (potentially using a `routes` page directory structure?)
-- Improve output code quality
+- Multipage website compilation (potentially using the `pages` directory convention?)
 - New project creation using `npm init delgada` command
-- Rebuild the compiler and CLI using the Rust programming language
 - Ship built-in dev server/file watcher?
 - Ship built-in code formatter?
 - Ship built-in code linter?

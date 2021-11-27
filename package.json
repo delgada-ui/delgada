@@ -1,6 +1,6 @@
 {
-  "name": "delgada",
-  "version": "0.1.1",
+  "name": "@delgada/core",
+  "version": "0.0.1",
   "description": "A frontend web compiler for building slim UIs.",
   "author": "Hawk Ticehurst <hawkticehurst@gmail.com>",
   "license": "MIT",
@@ -12,15 +12,37 @@
   "bugs": {
     "url": "https://github.com/delgada-ui/delgada/issues"
   },
-  "main": "src/index.js",
-  "bin": {
-    "delgada": "src/index.js"
-  },
-  "devDependencies": {
-    "prettier": "^2.4.1"
+  "scripts": {
+    "artifacts": "napi artifacts",
+    "build": "napi build --platform --release",
+    "build:debug": "napi build --platform",
+    "prepublishOnly": "napi prepublish -t npm",
+    "version": "napi version"
   },
   "dependencies": {
-    "node-html-parser": "^5.0.0"
+    "@node-rs/helper": "^1.2.1"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^1.2.1"
+  },
+  "napi": {
+    "name": "core",
+    "triples": {
+      "additional": [
+        "aarch64-apple-darwin",
+        "aarch64-linux-android",
+        "aarch64-unknown-linux-gnu",
+        "aarch64-unknown-linux-musl",
+        "aarch64-pc-windows-msvc",
+        "armv7-unknown-linux-gnueabihf",
+        "x86_64-unknown-linux-musl",
+        "x86_64-unknown-freebsd",
+        "i686-pc-windows-msvc"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">= 10"
   },
   "keywords": [
     "delgada",

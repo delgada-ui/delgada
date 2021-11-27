@@ -1,0 +1,21 @@
+[package]
+name = "delgada"
+version = "0.0.1"
+authors = ["Hawk Ticehurst <hawkticehurst@gmail.com>"]
+edition = "2018"
+license = "MIT"
+build = "build.rs"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+napi = "1"
+napi-derive = "1"
+
+[build-dependencies]
+napi-build = "1"
+
+[profile.release]
+lto = true
