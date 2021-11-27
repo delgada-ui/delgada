@@ -1,9 +1,17 @@
 {
   "name": "delgada",
   "version": "0.1.0",
-  "description": "A small frontend compiler for writing vanilla HTML, CSS, and JavaScript with the ergonomics of a modern frontend framework.",
-  "author": "Hawk Ticehurst",
+  "description": "A frontend web compiler for building slim UIs.",
+  "author": "Hawk Ticehurst <hawkticehurst@gmail.com>",
   "license": "MIT",
+  "homepage": "https://github.com/delgada-ui/delgada#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delgada-ui/delgada.git"
+  },
+  "bugs": {
+    "url": "https://github.com/delgada-ui/delgada/issues"
+  },
   "main": "src/index.js",
   "bin": {
     "delgada": "src/index.js"
@@ -13,5 +21,13 @@
   },
   "dependencies": {
     "node-html-parser": "^5.0.0"
-  }
+  },
+  "keywords": [
+    "delgada",
+    "ui",
+    "components",
+    "framework",
+    "compiler",
+    "templating"
+  ]
 }
