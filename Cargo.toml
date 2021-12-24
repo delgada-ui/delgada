@@ -2,7 +2,7 @@
 name = "delgada"
 version = "0.0.1"
 authors = ["Hawk Ticehurst <hawkticehurst@gmail.com>"]
-edition = "2018"
+edition = "2021"
 license = "MIT"
 build = "build.rs"
 publish = false
@@ -11,11 +11,12 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-napi = "1"
-napi-derive = "1"
+# Default enable napi4 feature, see https://nodejs.org/api/n-api.html#node-api-version-matrix
+napi = { version = "2.0.0", default-features = false, features = ["napi4"] }
+napi-derive = "2.0.0"
 
 [build-dependencies]
-napi-build = "1"
+napi-build = "1.2.0"
 
 [profile.release]
 lto = true
