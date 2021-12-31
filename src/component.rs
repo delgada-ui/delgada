@@ -24,11 +24,14 @@ pub fn component_replace(
   for node in html.select(component_name).unwrap().collect::<Vec<_>>() {
     let (imported_css, imported_js) = replace(node);
 
-    // If multiple component instances exist do not duplicate styles
+    // If multiple component instances exist do not duplicate component styles
     if !css.contains(&imported_css) {
       css += &imported_css;
     }
-    js += &imported_js;
+    // If multiple component instances exist do not duplicate component logic
+    if !js.contains(&imported_js) {
+      js += &imported_js;
+    }
   }
 
   (css, js)
