@@ -19,10 +19,12 @@
     "build": "napi build --platform --release",
     "build:debug": "napi build --platform",
     "prepublishOnly": "napi prepublish -t npm",
-    "version": "napi version"
+    "version": "napi version",
+    "test": "ava"
   },
   "devDependencies": {
-    "@napi-rs/cli": "^2.0.0"
+    "@napi-rs/cli": "^2.0.0",
+    "ava": "^3.15.0"
   },
   "napi": {
     "name": "core",
