@@ -75,8 +75,11 @@ fn build_output(entry_dir: &str, component_path: &str) -> (NodeRef, String, Stri
   // Get component JavaScript
   for script_tag_match in html.select("script").unwrap() {
     let script_node = script_tag_match.as_node();
-    let js_text_node = script_node.first_child().unwrap();
-    js += &serialize_node_to_string(js_text_node);
+    let js_text_node = script_node.first_child();
+    if js_text_node == None {
+      continue;
+    }
+    js += &serialize_node_to_string(js_text_node.unwrap());
     script_node.detach();
   }
 
