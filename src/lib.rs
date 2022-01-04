@@ -2,6 +2,7 @@
 
 mod component;
 mod dom;
+mod file;
 mod js;
 mod parse;
 
@@ -11,6 +12,7 @@ extern crate napi_derive;
 use colored::*;
 use component::{component_replace, get_imported_component_paths};
 use dom::{create_and_insert_element, serialize_node_to_string};
+use file::clear_dir;
 use kuchiki::NodeRef;
 use parse::parse;
 use std::{collections::BTreeMap, fs, path::Path, str, time::Instant};
@@ -24,14 +26,13 @@ pub fn compile(entry_dir: String, build_dir: String) {
   );
   let now = Instant::now();
 
-  let (html, css, js) = build_output(entry_dir.as_str(), "index.html");
+  // Build delgada source code
+  let full_path = format!("{}/index.html", entry_dir);
+  let component_path = Path::new(&full_path);
+  let (html, css, js) = build_output(&component_path.canonicalize().unwrap());
 
-  // Create build directory (remove it first if it exists)
-  let build_dir_path = Path::new(&build_dir);
-  if build_dir_path.exists() {
-    std::fs::remove_dir_all(build_dir_path).unwrap();
-  }
-  std::fs::create_dir_all(build_dir_path).unwrap();
+  // Clear build directory
+  clear_dir(&build_dir);
 
   // Write output CSS if it exists
   if !css.is_empty() {
@@ -66,9 +67,8 @@ pub fn compile(entry_dir: String, build_dir: String) {
   println!("{} build in {:.2?}\n", "Finished".green().bold(), elapsed);
 }
 
-fn build_output(entry_dir: &str, component_path: &str) -> (NodeRef, String, String) {
-  let entry_path = format!("{}/{}", entry_dir, component_path);
-  let mut html = parse(&Path::new(&entry_path));
+fn build_output(component_path: &Path) -> (NodeRef, String, String) {
+  let mut html = parse(&component_path);
   let mut css = "".to_string();
   let mut js = "".to_string();
 
@@ -89,14 +89,19 @@ fn build_output(entry_dir: &str, component_path: &str) -> (NodeRef, String, Stri
   }
 
   // Get a list of all imported component paths
-  let imported_components = get_imported_component_paths(&html);
+  let mut imported_components = Vec::<String>::new();
+  let component_base_path = component_path.parent().unwrap().to_str().unwrap();
+  get_imported_component_paths(&html, &mut imported_components, component_base_path);
 
   // Find and replace all imported component instances in the DOM tree
-  for (imported_component_name, imported_component_path) in imported_components {
+  for imported_component_path in imported_components {
+    let component_path = Path::new(&imported_component_path);
+    let component_name = component_path.file_stem().unwrap().to_str().unwrap();
+
     // Replace the imported component element tag with the built html
-    let (new_css, new_js) = component_replace(imported_component_name.as_str(), &mut html, |_| {
+    let (component_css, component_js) = component_replace(component_name, &mut html, |_| {
       // Recursively build the outputs of imported components
-      let (html, css, js) = build_output(&entry_dir, &imported_component_path);
+      let (html, css, js) = build_output(&component_path);
       let body_children = html.select_first("body").unwrap().as_node().children();
       let mut children_list = Vec::new();
       for child in body_children {
@@ -106,8 +111,8 @@ fn build_output(entry_dir: &str, component_path: &str) -> (NodeRef, String, Stri
       (Some(children_list), css, js)
     });
 
-    css += &new_css;
-    js += &new_js;
+    css += &component_css;
+    js += &component_js;
   }
 
   (html, css, js)
