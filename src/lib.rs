@@ -39,9 +39,9 @@ pub fn compile(entry_dir: String, build_dir: String) {
     let css_build_path = format!("{}/index.css", build_dir);
     fs::write(css_build_path, css).expect("Unable to write file");
 
-    // Add link tag referencing build.css within html
+    // Add link tag referencing index.css within html
     let mut attrs = BTreeMap::<&str, &str>::new();
-    attrs.insert("href", "build.css");
+    attrs.insert("href", "index.css");
     attrs.insert("rel", "stylesheet");
     create_and_insert_element(&html, "head", "link", attrs);
   }
@@ -52,9 +52,9 @@ pub fn compile(entry_dir: String, build_dir: String) {
     let js = js::post_process(js);
     fs::write(js_build_path, js).expect("Unable to write file");
 
-    // Add script tag referencing build.js within html
+    // Add script tag referencing index.js within html
     let mut attrs = BTreeMap::<&str, &str>::new();
-    attrs.insert("src", "build.js");
+    attrs.insert("src", "index.js");
     attrs.insert("type", "module");
     create_and_insert_element(&html, "head", "script", attrs);
   }
