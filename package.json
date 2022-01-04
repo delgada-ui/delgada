@@ -1,6 +1,6 @@
 {
   "name": "@delgada/core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A frontend web compiler for building slim UIs.",
   "author": "Hawk Ticehurst <hawkticehurst@gmail.com>",
   "license": "MIT",
