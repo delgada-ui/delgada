@@ -12,10 +12,11 @@ extern crate napi_derive;
 use colored::*;
 use component::{component_replace, get_imported_component_paths};
 use dom::{create_and_insert_element, get_node_text};
-use file::clear_dir;
+use file::{clear_dir, copy_dir_all};
+use glob::glob;
 use kuchiki::NodeRef;
 use parse::parse;
-use std::{collections::BTreeMap, fs, path::Path, str, time::Instant};
+use std::{collections::BTreeMap, fs, path::Path, process, str, time::Instant};
 
 #[napi]
 pub fn compile(entry_dir: String, build_dir: String) {
@@ -26,13 +27,90 @@ pub fn compile(entry_dir: String, build_dir: String) {
   );
   let now = Instant::now();
 
-  // Build delgada source code
-  let full_path = format!("{}/index.html", entry_dir);
-  let component_path = Path::new(&full_path);
-  let (html, css, js) = build_output(&component_path.canonicalize().unwrap());
+  // Build index/homepage
+  let path_string = format!("{}/index.html", entry_dir);
+  let entry_path = Path::new(&path_string);
 
-  // Clear build directory
+  // Clear build directory if it exists (or create a new one if it doesn't)
   clear_dir(&build_dir);
+
+  // If an assets directory exists in the entry directory copy it to the build directory
+  let assets_path = format!("{}/assets", entry_dir);
+  if Path::new(&assets_path).exists() {
+    let assets_build_dir = format!("{}/assets", build_dir);
+    copy_dir_all(&assets_path, &assets_build_dir).unwrap_or_else(|err| {
+      println!(
+        "{}: Problem copying assets directory at '{}' to build: {}\n",
+        "Error".red().bold(),
+        &assets_path,
+        err
+      );
+      process::exit(1);
+    });
+  }
+
+  // Build and write index/homepage output
+  build_page(entry_path, &build_dir);
+
+  // Build pages from pages directory if it exists
+  let path_string = format!("{}/pages", entry_dir);
+  let pages_path = Path::new(&path_string);
+  if pages_path.exists() {
+    let pattern = format!("{}/**/index.html", pages_path.to_str().unwrap());
+
+    // Get the entry path for every sub directory in pages
+    for entry_path in glob(&pattern).unwrap().collect::<Vec<_>>() {
+      let entry_path = entry_path.unwrap();
+      let build_dir = format!(
+        "{}/{}",
+        build_dir,
+        entry_path
+          .to_str()
+          .unwrap()
+          .to_string()
+          .strip_prefix("src/pages/")
+          .unwrap()
+          .strip_suffix("index.html")
+          .unwrap()
+      );
+
+      // Clear current page directory within build if it exists (or create a new one if it doesn't)
+      clear_dir(&build_dir);
+
+      // If an assets directory exists in the current page directory copy it to the build directory
+      let assets_path = format!(
+        "{}/assets",
+        entry_path
+          .to_str()
+          .unwrap()
+          .to_string()
+          .strip_suffix("/index.html")
+          .unwrap()
+      );
+      if Path::new(&assets_path).exists() {
+        let assets_build_dir = format!("{}/assets", build_dir);
+        copy_dir_all(&assets_path, &assets_build_dir).unwrap_or_else(|err| {
+          println!(
+            "{}: Problem copying assets directory at '{}' to build: {}\n",
+            "Error".red().bold(),
+            &assets_path,
+            err
+          );
+          process::exit(1);
+        });
+      }
+
+      // Build and write current page output
+      build_page(&entry_path, &build_dir);
+    }
+  }
+
+  let elapsed = now.elapsed();
+  println!("{} build in {:.2?}\n", "Finished".green().bold(), elapsed);
+}
+
+fn build_page(component_path: &Path, build_dir: &String) {
+  let (html, css, js) = build_output(&component_path.canonicalize().unwrap());
 
   // Write output CSS if it exists
   if !css.is_empty() {
@@ -62,9 +140,6 @@ pub fn compile(entry_dir: String, build_dir: String) {
   // Write output HTML
   let html_build_path = format!("{}/index.html", build_dir);
   html.serialize_to_file(html_build_path).ok();
-
-  let elapsed = now.elapsed();
-  println!("{} build in {:.2?}\n", "Finished".green().bold(), elapsed);
 }
 
 fn build_output(component_path: &Path) -> (NodeRef, String, String) {
