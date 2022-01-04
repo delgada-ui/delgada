@@ -32,14 +32,9 @@ fn create_element(name: &str) -> NodeRef {
   )
 }
 
-pub fn serialize_node_to_string(node: NodeRef) -> String {
-  let mut writer = Vec::new();
-
-  node.serialize(&mut writer).unwrap();
-  let node_str = match str::from_utf8(&writer) {
-    Ok(node_str) => node_str,
-    Err(e) => panic!("Invalid UTF-8 sequence while serializing node: {}", e),
-  };
-
-  String::from(node_str)
+pub fn get_node_text(node: NodeRef) -> String {
+  let node_text = node.as_text().expect(
+    "NEEDS PROPER ERROR HANDLING: `get_node_text` failed to get node text from given node.",
+  );
+  String::from(node_text.borrow().as_str())
 }

@@ -11,7 +11,7 @@ extern crate napi_derive;
 
 use colored::*;
 use component::{component_replace, get_imported_component_paths};
-use dom::{create_and_insert_element, serialize_node_to_string};
+use dom::{create_and_insert_element, get_node_text};
 use file::clear_dir;
 use kuchiki::NodeRef;
 use parse::parse;
@@ -75,8 +75,11 @@ fn build_output(component_path: &Path) -> (NodeRef, String, String) {
   // Get component JavaScript
   for script_tag_match in html.select("script").unwrap() {
     let script_node = script_tag_match.as_node();
-    let js_text_node = script_node.first_child().unwrap();
-    js += &serialize_node_to_string(js_text_node);
+    let js_text_node = script_node.first_child();
+    if js_text_node == None {
+      continue;
+    }
+    js += &get_node_text(js_text_node.unwrap());
     script_node.detach();
   }
 
@@ -84,7 +87,7 @@ fn build_output(component_path: &Path) -> (NodeRef, String, String) {
   for style_tag_match in html.select("style").unwrap() {
     let style_node = style_tag_match.as_node();
     let css_text_node = style_tag_match.as_node().first_child().unwrap();
-    css += &serialize_node_to_string(css_text_node);
+    css += &get_node_text(css_text_node);
     style_node.detach();
   }
 
