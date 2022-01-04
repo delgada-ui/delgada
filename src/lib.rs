@@ -36,7 +36,7 @@ pub fn compile(entry_dir: String, build_dir: String) {
 
   // Write output CSS if it exists
   if !css.is_empty() {
-    let css_build_path = format!("{}/build.css", build_dir);
+    let css_build_path = format!("{}/index.css", build_dir);
     fs::write(css_build_path, css).expect("Unable to write file");
 
     // Add link tag referencing build.css within html
@@ -48,7 +48,7 @@ pub fn compile(entry_dir: String, build_dir: String) {
 
   // Write output JS if it exists
   if !js.is_empty() {
-    let js_build_path = format!("{}/build.js", build_dir);
+    let js_build_path = format!("{}/index.js", build_dir);
     let js = js::post_process(js);
     fs::write(js_build_path, js).expect("Unable to write file");
 
@@ -60,7 +60,7 @@ pub fn compile(entry_dir: String, build_dir: String) {
   }
 
   // Write output HTML
-  let html_build_path = format!("{}/build.html", build_dir);
+  let html_build_path = format!("{}/index.html", build_dir);
   html.serialize_to_file(html_build_path).ok();
 
   let elapsed = now.elapsed();
