@@ -4,35 +4,72 @@ mod component;
 mod dom;
 mod file;
 mod js;
+mod messages;
 mod parse;
 
 #[macro_use]
 extern crate napi_derive;
 
-use colored::*;
 use component::{component_replace, get_imported_component_paths};
 use dom::{create_and_insert_element, get_node_text};
-use file::clear_dir;
+use file::{copy_assets_to_build, remove_dir_contents};
+use glob::glob;
 use kuchiki::NodeRef;
 use parse::parse;
 use std::{collections::BTreeMap, fs, path::Path, str, time::Instant};
 
 #[napi]
 pub fn compile(entry_dir: String, build_dir: String) {
-  println!(
-    "\n{} source code starting at {}/index.html",
-    "Compiling".green().bold(),
-    entry_dir
-  );
+  messages::compiling(&entry_dir);
   let now = Instant::now();
 
-  // Build delgada source code
-  let full_path = format!("{}/index.html", entry_dir);
-  let component_path = Path::new(&full_path);
-  let (html, css, js) = build_output(&component_path.canonicalize().unwrap());
+  // Build index/homepage
+  let assets_path_string = format!("{}/assets", entry_dir);
+  let index_path_string = format!("{}/index.html", entry_dir);
+  let index_path = Path::new(&index_path_string);
+  remove_dir_contents(&build_dir);
+  copy_assets_to_build(&assets_path_string, &build_dir);
+  build_page(index_path, &build_dir);
 
-  // Clear build directory
-  clear_dir(&build_dir);
+  // Build pages from pages directory (if it exists)
+  let pages_path_string = format!("{}/pages", entry_dir);
+  let pages_path = Path::new(&pages_path_string);
+  if pages_path.exists() {
+    let pattern = format!("{}/**/index.html", pages_path.to_str().unwrap());
+    for page_path in glob(&pattern).unwrap().collect::<Vec<_>>() {
+      let page_path = page_path.unwrap();
+      let build_dir = format!(
+        "{}/{}",
+        build_dir,
+        page_path
+          .to_str()
+          .unwrap()
+          .to_string()
+          .strip_prefix("src/pages/")
+          .unwrap()
+          .strip_suffix("index.html")
+          .unwrap()
+      );
+      let assets_path_string = format!(
+        "{}/assets",
+        page_path
+          .to_str()
+          .unwrap()
+          .to_string()
+          .strip_suffix("/index.html")
+          .unwrap()
+      );
+      remove_dir_contents(&build_dir);
+      copy_assets_to_build(&assets_path_string, &build_dir);
+      build_page(&page_path, &build_dir);
+    }
+  }
+
+  messages::finished(now.elapsed());
+}
+
+fn build_page(component_path: &Path, build_dir: &String) {
+  let (html, css, js) = build_output(&component_path.canonicalize().unwrap());
 
   // Write output CSS if it exists
   if !css.is_empty() {
@@ -62,9 +99,6 @@ pub fn compile(entry_dir: String, build_dir: String) {
   // Write output HTML
   let html_build_path = format!("{}/index.html", build_dir);
   html.serialize_to_file(html_build_path).ok();
-
-  let elapsed = now.elapsed();
-  println!("{} build in {:.2?}\n", "Finished".green().bold(), elapsed);
 }
 
 fn build_output(component_path: &Path) -> (NodeRef, String, String) {

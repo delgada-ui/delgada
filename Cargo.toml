@@ -17,6 +17,7 @@ napi-derive = "2.0.0"
 kuchiki = "0.8.1"
 html5ever = "0.25.1"
 colored = "2"
+glob = "0.3.0"
 
 [build-dependencies]
 napi-build = "1.2.0"
