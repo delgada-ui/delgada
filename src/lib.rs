@@ -10,7 +10,9 @@ mod parse;
 #[macro_use]
 extern crate napi_derive;
 
-use component::{component_replace, get_imported_component_paths};
+use component::{
+  get_component_props, get_imported_component_paths, replace_component, replace_props,
+};
 use dom::{create_and_insert_element, get_node_text};
 use file::{copy_assets_to_build, remove_dir_contents};
 use glob::glob;
@@ -69,7 +71,8 @@ pub fn compile(entry_dir: String, build_dir: String) {
 }
 
 fn build_page(component_path: &Path, build_dir: &String) {
-  let (html, css, js) = build_output(&component_path.canonicalize().unwrap());
+  let component_props = BTreeMap::<String, String>::new();
+  let (html, css, js) = build_output(&component_path.canonicalize().unwrap(), &component_props);
 
   // Write output CSS if it exists
   if !css.is_empty() {
@@ -101,7 +104,10 @@ fn build_page(component_path: &Path, build_dir: &String) {
   html.serialize_to_file(html_build_path).ok();
 }
 
-fn build_output(component_path: &Path) -> (NodeRef, String, String) {
+fn build_output(
+  component_path: &Path,
+  component_props: &BTreeMap<String, String>,
+) -> (NodeRef, String, String) {
   let mut html = parse(&component_path);
   let mut css = "".to_string();
   let mut js = "".to_string();
@@ -125,6 +131,9 @@ fn build_output(component_path: &Path) -> (NodeRef, String, String) {
     style_node.detach();
   }
 
+  // Replace prop templates with prop values
+  replace_props(&html, &component_props);
+
   // Get a list of all imported component paths
   let mut imported_components = Vec::<String>::new();
   let component_base_path = component_path.parent().unwrap().to_str().unwrap();
@@ -136,9 +145,13 @@ fn build_output(component_path: &Path) -> (NodeRef, String, String) {
     let component_name = component_path.file_stem().unwrap().to_str().unwrap();
 
     // Replace the imported component element tag with the built html
-    let (component_css, component_js) = component_replace(component_name, &mut html, |_| {
+    let (component_css, component_js) = replace_component(component_name, &mut html, |component| {
+      // Check if component has any props
+      let mut props = BTreeMap::<String, String>::new();
+      get_component_props(component, &mut props);
+
       // Recursively build the outputs of imported components
-      let (html, css, js) = build_output(&component_path);
+      let (html, css, js) = build_output(&component_path, &props);
       let body_children = html.select_first("body").unwrap().as_node().children();
       let mut children_list = Vec::new();
       for child in body_children {

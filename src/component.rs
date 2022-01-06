@@ -1,7 +1,7 @@
-use kuchiki::{ElementData, NodeDataRef, NodeRef};
-use std::path::Path;
+use kuchiki::{ElementData, NodeData, NodeDataRef, NodeRef};
+use std::{collections::BTreeMap, path::Path};
 
-pub fn component_replace(
+pub fn replace_component(
   component_name: &str,
   html: &mut NodeRef,
   callback: impl Fn(&NodeRef) -> (Option<Vec<NodeRef>>, String, String),
@@ -82,4 +82,52 @@ pub fn get_imported_component_paths(
 
 fn remove_whitespace(s: &mut String) {
   s.retain(|c| !c.is_whitespace());
+}
+
+pub fn get_component_props(component: &NodeRef, props_list: &mut BTreeMap<String, String>) {
+  let data = component.data().to_owned();
+  match data {
+    NodeData::Element(component_data) => {
+      let props = component_data.attributes.borrow().to_owned().map;
+      for (prop_name, prop_value) in props {
+        props_list.insert(prop_name.local.to_string(), prop_value.value.to_string());
+      }
+    }
+    NodeData::Comment(_) => println!("\ncomment\n"),
+    NodeData::Doctype(_) => println!("\ndoctype\n"),
+    NodeData::Document(_) => println!("\ndocument\n"),
+    NodeData::DocumentFragment => println!("\ndoc fragment\n"),
+    NodeData::ProcessingInstruction(_) => println!("\nprocessing instruction\n"),
+    NodeData::Text(_) => println!("\ntext\n"),
+  }
+}
+
+pub fn replace_props(html: &NodeRef, component_props: &BTreeMap<String, String>) {
+  for child in html.inclusive_descendants() {
+    if let Some(text) = child.into_text_ref() {
+      let text_node = text.as_node();
+      for (prop_name, prop_value) in component_props {
+        let pattern = format!("{{{}}}", prop_name);
+        if text.borrow().as_str().contains(&pattern) {
+          let data = text_node.data().to_owned();
+          match data {
+            NodeData::Element(_) => println!("\nelement\n"),
+            NodeData::Comment(_) => println!("\ncomment\n"),
+            NodeData::Doctype(_) => println!("\ndoctype\n"),
+            NodeData::Document(_) => println!("\ndocument\n"),
+            NodeData::DocumentFragment => println!("\ndoc fragment\n"),
+            NodeData::ProcessingInstruction(_) => println!("\nprocessing instruction\n"),
+            NodeData::Text(element_text) => {
+              let text = element_text.borrow().to_owned();
+              let text = text.replace(&pattern, &prop_value);
+              println!("text: {}", text);
+              let text_parent_node = text_node.parent().unwrap();
+              text_parent_node.append(NodeRef::new_text(text));
+              text_node.detach();
+            }
+          }
+        }
+      }
+    }
+  }
 }
