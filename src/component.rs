@@ -120,7 +120,6 @@ pub fn replace_props(html: &NodeRef, component_props: &BTreeMap<String, String>)
             NodeData::Text(element_text) => {
               let text = element_text.borrow().to_owned();
               let text = text.replace(&pattern, &prop_value);
-              println!("text: {}", text);
               let text_parent_node = text_node.parent().unwrap();
               text_parent_node.append(NodeRef::new_text(text));
               text_node.detach();
