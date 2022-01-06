@@ -93,12 +93,12 @@ pub fn get_component_props(component: &NodeRef, props_list: &mut BTreeMap<String
         props_list.insert(prop_name.local.to_string(), prop_value.value.to_string());
       }
     }
-    NodeData::Comment(_) => println!("\ncomment\n"),
-    NodeData::Doctype(_) => println!("\ndoctype\n"),
-    NodeData::Document(_) => println!("\ndocument\n"),
-    NodeData::DocumentFragment => println!("\ndoc fragment\n"),
-    NodeData::ProcessingInstruction(_) => println!("\nprocessing instruction\n"),
-    NodeData::Text(_) => println!("\ntext\n"),
+    NodeData::Comment(_) => (),
+    NodeData::Doctype(_) => (),
+    NodeData::Document(_) => (),
+    NodeData::DocumentFragment => (),
+    NodeData::ProcessingInstruction(_) => (),
+    NodeData::Text(_) => (),
   }
 }
 
@@ -111,12 +111,6 @@ pub fn replace_props(html: &NodeRef, component_props: &BTreeMap<String, String>)
         if text.borrow().as_str().contains(&pattern) {
           let data = text_node.data().to_owned();
           match data {
-            NodeData::Element(_) => println!("\nelement\n"),
-            NodeData::Comment(_) => println!("\ncomment\n"),
-            NodeData::Doctype(_) => println!("\ndoctype\n"),
-            NodeData::Document(_) => println!("\ndocument\n"),
-            NodeData::DocumentFragment => println!("\ndoc fragment\n"),
-            NodeData::ProcessingInstruction(_) => println!("\nprocessing instruction\n"),
             NodeData::Text(element_text) => {
               let text = element_text.borrow().to_owned();
               let text = text.replace(&pattern, &prop_value);
@@ -124,6 +118,12 @@ pub fn replace_props(html: &NodeRef, component_props: &BTreeMap<String, String>)
               text_parent_node.append(NodeRef::new_text(text));
               text_node.detach();
             }
+            NodeData::Comment(_) => (),
+            NodeData::Element(_) => (),
+            NodeData::Doctype(_) => (),
+            NodeData::Document(_) => (),
+            NodeData::DocumentFragment => (),
+            NodeData::ProcessingInstruction(_) => (),
           }
         }
       }
