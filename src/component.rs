@@ -85,8 +85,7 @@ fn remove_whitespace(s: &mut String) {
 }
 
 pub fn get_component_props(component: &NodeRef, props_list: &mut BTreeMap<String, String>) {
-  let data = component.data().to_owned();
-  match data {
+  match component.data() {
     NodeData::Element(component_data) => {
       let props = component_data.attributes.borrow().to_owned().map;
       for (prop_name, prop_value) in props {
@@ -109,13 +108,13 @@ pub fn replace_props(html: &NodeRef, component_props: &BTreeMap<String, String>)
       match node.data() {
         NodeData::Element(element_data) => {
           let mut attrs = element_data.attributes.borrow_mut();
-          let mut replace_values = BTreeMap::new();
+          let mut attr_to_prop_mapping = BTreeMap::new();
           for (attr_name, attr_value) in attrs.to_owned().map {
             if attr_value.value.contains(&pattern) {
-              replace_values.insert(attr_name.local, prop_value.to_string());
+              attr_to_prop_mapping.insert(attr_name.local, prop_value.to_string());
             }
           }
-          for (attr_name, prop_value) in replace_values {
+          for (attr_name, prop_value) in attr_to_prop_mapping {
             attrs.remove(&attr_name);
             attrs.insert(&attr_name, prop_value);
           }
