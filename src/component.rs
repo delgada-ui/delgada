@@ -1,7 +1,7 @@
-use kuchiki::{ElementData, NodeDataRef, NodeRef};
-use std::path::Path;
+use kuchiki::{ElementData, NodeData, NodeDataRef, NodeRef};
+use std::{collections::BTreeMap, path::Path};
 
-pub fn component_replace(
+pub fn replace_component(
   component_name: &str,
   html: &mut NodeRef,
   callback: impl Fn(&NodeRef) -> (Option<Vec<NodeRef>>, String, String),
@@ -39,8 +39,8 @@ pub fn get_imported_component_paths(
   imported_components: &mut Vec<String>,
   component_base_path: &str,
 ) {
-  for child in html.inclusive_descendants() {
-    if let Some(comment) = child.into_comment_ref() {
+  for node in html.inclusive_descendants() {
+    if let Some(comment) = node.into_comment_ref() {
       let mut comment_string = comment.as_node().to_string();
 
       if comment_string.contains("import") {
@@ -82,4 +82,59 @@ pub fn get_imported_component_paths(
 
 fn remove_whitespace(s: &mut String) {
   s.retain(|c| !c.is_whitespace());
+}
+
+pub fn get_component_props(component: &NodeRef, props_list: &mut BTreeMap<String, String>) {
+  match component.data() {
+    NodeData::Element(component_data) => {
+      let props = component_data.attributes.borrow().to_owned().map;
+      for (prop_name, prop_value) in props {
+        props_list.insert(prop_name.local.to_string(), prop_value.value.to_string());
+      }
+    }
+    NodeData::Comment(_) => (),
+    NodeData::Doctype(_) => (),
+    NodeData::Document(_) => (),
+    NodeData::DocumentFragment => (),
+    NodeData::ProcessingInstruction(_) => (),
+    NodeData::Text(_) => (),
+  }
+}
+
+pub fn replace_props(html: &NodeRef, component_props: &BTreeMap<String, String>) {
+  for node in html.descendants().collect::<Vec<_>>() {
+    for (prop_name, prop_value) in component_props {
+      let pattern = format!("{{{}}}", prop_name);
+      match node.data() {
+        NodeData::Element(element_data) => {
+          let mut attrs = element_data.attributes.borrow_mut();
+          let mut attr_to_prop_mapping = BTreeMap::new();
+          for (attr_name, attr_value) in attrs.to_owned().map {
+            if attr_value.value.contains(&pattern) {
+              attr_to_prop_mapping.insert(attr_name.local, prop_value.to_string());
+            }
+          }
+          for (attr_name, prop_value) in attr_to_prop_mapping {
+            attrs.remove(&attr_name);
+            attrs.insert(&attr_name, prop_value);
+          }
+        }
+        NodeData::Text(element_text) => {
+          if element_text.borrow().contains(&pattern) {
+            let new_text = element_text
+              .borrow()
+              .to_owned()
+              .replace(&pattern, &prop_value);
+            node.insert_after(NodeRef::new_text(new_text));
+            node.detach();
+          }
+        }
+        NodeData::Comment(_) => (),
+        NodeData::Doctype(_) => (),
+        NodeData::Document(_) => (),
+        NodeData::DocumentFragment => (),
+        NodeData::ProcessingInstruction(_) => (),
+      }
+    }
+  }
 }
