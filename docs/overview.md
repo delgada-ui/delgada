@@ -7,18 +7,17 @@ It operates within the confines of standard HTML syntax and simply seeks to enab
 - A familiar component format
 - Basic data passing via component props
 - An intuitive templating syntax
-- Very basic component-scoped CSS and JavaScript
 - A few more things
 
 Delgada is best used for building small (mostly) static websites. You won't find any fancy diffing algorithms, virtual doms, reactive data, stateful components, or declarative syntax here. It's just plain vanilla HTML, CSS, and JavaScript that can be organized and structured in a way that is far more composable and easy to reason about.
 
 Below is a quick overview of some of the major parts of Delgada, along with a list of future goals towards the bottom.
 
-### Component Format
+### Component format
 
 The Delgada component format takes heavy inspiration from that of [Svelte](https://svelte.dev/), [Vue](https://vuejs.org/), and [HTMLx](https://github.com/htmlx-org/HTMLx) syntax.
 
-Components are written in plain old `.html` files and have a basic structure that looks like the following:
+Components are written in `.html` files and have a basic structure that looks like the following:
 
 ```html
 <script>
@@ -32,22 +31,61 @@ Components are written in plain old `.html` files and have a basic structure tha
 </style>
 ```
 
-To use a component in another `.html` file, you simple add a multiline comment at the top of the file that looks like the following:
+To use a component in another `.html` file, you simply add a multiline comment at the top of the file and then use the component anywhere in your markup:
 
 ```html
 <!-- 
-  import './path/to/mycomponent.html'
+  import './path/to/greeting.html'
  -->
 
-<mycomponent />
+<greeting></greeting>
 ```
 
 Some important things to note about this are that:
 
-- The file name (i.e. `mycomponent.html`) and component (i.e `<mycomponent />`) must be the same
-- Component names must be lowercase to match the syntax standards of vanilla HTML
-- Components must take the form of self closing HTML tags (i.e. `<mycomponent></mycomponent>` is not valid)
-- While a single word component is demonstrated above, component names with dashes, such as `<my-component />`, are also valid
+#### File name and component name must be the same
+
+A components name is defined/determined by its file name, so they must be the same when importing into other files.
+
+```html
+<!-- 
+  import './path/to/greeting.html' // OKAY!
+  import './path/to/hello.html'    // OKAY!
+ -->
+
+<greeting></greeting>   // OKAY!
+<hello1234></hello1234> // NOT OKAY!
+```
+
+#### Components are always lowercase
+
+Component names must be lowercase to match the syntax standards of vanilla HTML.
+
+```html
+<greeting></greeting> // OKAY!
+<Greeting></Greeting> // NOT OKAY!
+<GREETING></GREETING> // NOT OKAY!
+```
+
+#### Components always have a closing tag
+
+Components must always have a closing tag. Self closing tags are **not** valid.
+
+```html
+<greeting></greeting> // OKAY!
+<greeting />          // NOT OKAY!
+<greeting>            // NOT OKAY!
+```
+
+#### Single word names or dashed names are okay
+
+While a single word component is demonstrated above, component names with dashes are also valid.
+
+```html
+<greeting></greeting>                 // OKAY!
+<my-greeting></my-greeting>           // OKAY!
+<my-long-greeting></my-long-greeting> // OKAY!
+```
 
 ### Component Props and Template Syntax
 
