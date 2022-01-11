@@ -79,9 +79,19 @@ fn build_page(component_path: &Path, build_dir: &String) {
     let css_build_path = format!("{}/index.css", build_dir);
     fs::write(css_build_path, css).expect("Unable to write file");
 
+    let build_dir_list: Vec<&str> = build_dir.split("/").collect();
+    let output_build_path: String;
+    if build_dir_list[0] == "." {
+      output_build_path = build_dir_list[2..].join("/");
+    } else {
+      output_build_path = build_dir_list[1..].join("/");
+    }
+
+    let output_build_path = format!("{}index.css", output_build_path);
+
     // Add link tag referencing index.css within html
     let mut attrs = BTreeMap::<&str, &str>::new();
-    attrs.insert("href", "index.css");
+    attrs.insert("href", &output_build_path);
     attrs.insert("rel", "stylesheet");
     create_and_insert_element(&html, "head", "link", attrs);
   }
@@ -92,9 +102,19 @@ fn build_page(component_path: &Path, build_dir: &String) {
     let js = js::post_process(js);
     fs::write(js_build_path, js).expect("Unable to write file");
 
+    let build_dir_list: Vec<&str> = build_dir.split("/").collect();
+    let output_build_path: String;
+    if build_dir_list[0] == "." {
+      output_build_path = build_dir_list[2..].join("/");
+    } else {
+      output_build_path = build_dir_list[1..].join("/");
+    }
+
+    let output_build_path = format!("{}index.js", output_build_path);
+
     // Add script tag referencing index.js within html
     let mut attrs = BTreeMap::<&str, &str>::new();
-    attrs.insert("src", "index.js");
+    attrs.insert("src", &output_build_path);
     attrs.insert("type", "module");
     create_and_insert_element(&html, "head", "script", attrs);
   }
