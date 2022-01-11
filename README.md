@@ -3,7 +3,7 @@
 [![NPM Version](https://img.shields.io/npm/v/delgada?color=blue)](https://www.npmjs.com/package/delgada)
 [![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)](./LICENSE)
 
-❗️ Warning: This is not production ready software and is in very active development. ❗️
+❗️ Warning: This is not production-ready software and is in very active development. ❗️
 
 ## What is Delgada?
 
