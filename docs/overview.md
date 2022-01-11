@@ -1,4 +1,4 @@
-## Documentation
+# Documentation
 
 The syntax and functionality of Delgada is intentionally small and concise.
 
@@ -13,7 +13,7 @@ Delgada is best used for building small (mostly) static websites. You won't find
 
 Below is a quick overview of some of the major parts of Delgada, along with a list of future goals towards the bottom.
 
-### Component format
+## Component format
 
 The Delgada component format takes heavy inspiration from that of [Svelte](https://svelte.dev/), [Vue](https://vuejs.org/), and [HTMLx](https://github.com/htmlx-org/HTMLx) syntax.
 
@@ -43,7 +43,7 @@ To use a component in another `.html` file, you simply add a multiline comment a
 
 Some important things to note about this are that:
 
-#### File name and component name must be the same
+### File name and component name must be the same
 
 A components name is defined/determined by its file name, so they must be the same when importing into other files.
 
@@ -57,7 +57,7 @@ A components name is defined/determined by its file name, so they must be the sa
 <hello1234></hello1234> // NOT OKAY!
 ```
 
-#### Components are always lowercase
+### Components are always lowercase
 
 Component names must be lowercase to match the syntax standards of vanilla HTML.
 
@@ -67,7 +67,7 @@ Component names must be lowercase to match the syntax standards of vanilla HTML.
 <GREETING></GREETING> // NOT OKAY!
 ```
 
-#### Components always have a closing tag
+### Components always have a closing tag
 
 Components must always have a closing tag. Self closing tags are **not** valid.
 
@@ -77,7 +77,7 @@ Components must always have a closing tag. Self closing tags are **not** valid.
 <greeting>            // NOT OKAY!
 ```
 
-#### Single word names or dashed names are okay
+### Single word names or dashed names are okay
 
 While a single word component is demonstrated above, component names with dashes are also valid.
 
@@ -87,7 +87,7 @@ While a single word component is demonstrated above, component names with dashes
 <my-long-greeting></my-long-greeting> // OKAY!
 ```
 
-### Component props and template syntax
+## Component props and template syntax
 
 Very rudimentary data passing and templating syntax is also possible in Delgada.
 
@@ -111,7 +111,7 @@ Inside your component, you can access the prop by using Delgada's templating syn
 
 The resulting compiled HTML will look like: `<h1>Hello Universe!</h1>`.
 
-#### Notes on props and template syntax
+### Notes on props and template syntax
 
 Prop names can be both single words and dash-separated words.
 
@@ -135,7 +135,7 @@ Template syntax is only valid inside of element text and element attributes.
 <p {attr-name}="value">Some text</p> // NOT OKAY
 ```
 
-### Component Logic and Styling
+## Component logic and styling
 
 Components can also contain logic and styling defined inside `script` and `style` tags respectively.
 
@@ -190,7 +190,7 @@ This is included so that component logic will not run until the DOM has been loa
 
 At this time, there is no way to opt out of this behavior but in the future there will be a `<script>` attribute implemented so component logic can be run in the global scope.
 
-### Future Functionality, Syntax, and Tooling
+## Future Functionality, Syntax, and Tooling
 
 Below is a list of future functionality and syntax that are being considered for Delgada.
 
