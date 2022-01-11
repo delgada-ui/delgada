@@ -137,13 +137,13 @@ Template syntax is only valid inside of element text and element attributes.
 
 ## Component logic and styling
 
-Components can also contain logic and styling defined inside `script` and `style` tags respectively.
+Components can also contain logic and styling, defined inside `script` and `style` tags respectively.
 
-At this time, logic and styling are NOT scoped to the component, meaning everything lives in the global scope and you are responsible for avoiding namespace clashes across all components and files. In the future the goal is to scope these details to each component instance.
+Currently, logic and styling are NOT scoped to the component (although it's a future goal). This means everything lives in the global scope and you are responsible for avoiding namespace clashes across all components and files.
 
 Another notable aspect of component logic and styling is that they must be written in vanilla JavaScript and CSS to follow conventions of vanilla HTML syntax.
 
-Below is a simple counter component example that demonstrates component logic and styling.
+Below is a simple counter component that demonstrates component logic and styling.
 
 ```html
 <script>
@@ -161,8 +161,6 @@ Below is a simple counter component example that demonstrates component logic an
 
 <style>
   button {
-    font-family: inherit;
-    font-size: 16px;
     border: none;
     border-radius: 50px;
     color: white;
@@ -178,7 +176,7 @@ Below is a simple counter component example that demonstrates component logic an
 </style>
 ```
 
-An important detail to know is that component logic is automatically wrapped in the following code:
+By default, component JavaScript is automatically wrapped in a 'load' event listener so that this logic will not run until the DOM has been loaded. Without it, the snippet of code below would have to be manually included in nearly every component script.
 
 ```javascript
 window.addEventListener('load', () => {
@@ -186,19 +184,26 @@ window.addEventListener('load', () => {
 });
 ```
 
-This is included so that component logic will not run until the DOM has been loaded. Without it, the above snippet of code would have to be manually included in every component script.
-
 At this time, there is no way to opt out of this behavior but in the future there will be a `<script>` attribute implemented so component logic can be run in the global scope.
 
-## Future Functionality, Syntax, and Tooling
+## Future functionality, syntax, and tooling
 
 Below is a list of future functionality and syntax that are being considered for Delgada.
 
-- Rebuild the compiler using the Rust programming language
-- Nested component children using the `<slot />` element
+**Compiler syntax and functionality:**
+
+- Component scoped CSS and JavaScript
+- Global scope attributes for `<style>` and `<script>` tags
+- Nested component children using the `<slot />` tag
 - Multiple nested component children using named slots
-- Multipage website compilation (potentially using the `pages` directory convention?)
+- Import components via URLs
+- Automaticaly parse and compile imported markdown files into HTML?
+- Optional server support (i.e. wrap output compiled files in basic node server)?
+
+**Tooling:**
+
 - New project creation using `npm init delgada` command
 - Ship built-in dev server/file watcher?
 - Ship built-in code formatter?
 - Ship built-in code linter?
+- Ship built-in image compressor/reformatter?
