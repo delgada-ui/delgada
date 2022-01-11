@@ -1,4 +1,4 @@
-# Documentation
+# Delgada Overview
 
 The syntax and functionality of Delgada is intentionally small and concise.
 
