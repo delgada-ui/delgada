@@ -7,7 +7,7 @@
 
 ## What is Delgada?
 
-Delgada is a small, wickedly fast, Rust-based frontend compiler that enables developers to write/organize vanilla HTML, CSS, and JavaScript with similar ergonomics and composability to a modern frontend framework.
+Delgada is a small, wickedly fast, Rust-based frontend web compiler that enables developers to write/organize vanilla HTML, CSS, and JavaScript with similar ergonomics and composability to a modern frontend framework.
 
 ## Getting Started
 
