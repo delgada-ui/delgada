@@ -87,29 +87,53 @@ While a single word component is demonstrated above, component names with dashes
 <my-long-greeting></my-long-greeting> // OKAY!
 ```
 
-### Component Props and Template Syntax
+### Component props and template syntax
 
 Very rudimentary data passing and templating syntax is also possible in Delgada.
 
-Props take the exact same form as HTML attributes––the difference is simply in semantics, components have props, while HTML elements have attributes.
+Props take the exact same form as HTML attributes, with the only difference being semantics. Components have props. HTML elements have attributes.
 
-Inside your component, a prop is implicitly created by wrapping the desired prop name in curly braces and placing it directly in your markup.
-
-```html
-<h1>Hello {name}!</h1>
-```
-
-When the component is then used in another file, add the prop name and desired value to your component markup (again following the same syntax as standard HTML attributes).
+A prop is made up of a key and value pair, where the data contained in the value is passed into the component at compile time and rendered into final output markup.
 
 ```html
 <!-- 
   import './hello.html'
  -->
 
-<hello name="Universe" />
+<hello name="Universe"></hello>
+```
+
+Inside your component, you can access the prop by using Delgada's templating syntax. Simply wrap the prop name in curly braces and place it directly into your component markup.
+
+```html
+<h1>Hello {name}!</h1>
 ```
 
 The resulting compiled HTML will look like: `<h1>Hello Universe!</h1>`.
+
+#### Notes on props and template syntax
+
+Prop names can be both single words and dash-separated words.
+
+```html
+<hello name="Universe"></hello>       // OKAY!
+<hello first-name="Universe"></hello> // OKAY!
+```
+
+Prop values can be used multiple times in a component.
+
+```html
+<h1>Hello {name}!</h1>
+<p>How is your day going, {name}?</p>
+```
+
+Template syntax is only valid inside of element text and element attributes.
+
+```html
+<h1>Hello {name}!</h1>               // OKAY!
+<a href="{link}">Click me!</a>       // OKAY!
+<p {attr-name}="value">Some text</p> // NOT OKAY
+```
 
 ### Component Logic and Styling
 
