@@ -9,6 +9,14 @@ pub fn remove_dir_contents(dir: &String) {
   std::fs::create_dir_all(dir_path).unwrap();
 }
 
+// Given a directory path, create that directory if it doesn't exist.
+pub fn create_dir(dir: &String) {
+  let dir_path = Path::new(&dir);
+  if !dir_path.exists() {
+    std::fs::create_dir_all(dir_path).unwrap();
+  }
+}
+
 pub fn copy_assets_to_build(assets_path_string: &String, build_dir: &String) {
   if Path::new(&assets_path_string).exists() {
     let assets_build_path = format!("{}/assets", build_dir);
