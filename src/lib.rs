@@ -14,7 +14,7 @@ use component::{
   get_component_props, get_imported_component_paths, replace_component, replace_props,
 };
 use dom::{create_and_insert_element, get_node_text};
-use file::{copy_assets_to_build, remove_dir_contents};
+use file::{copy_assets_to_build, create_dir, remove_dir_contents};
 use glob::glob;
 use kuchiki::NodeRef;
 use parse::parse;
@@ -28,10 +28,11 @@ pub fn compile(entry_dir: String, build_dir: String) {
   // Build index/homepage
   let assets_path_string = format!("{}/assets", entry_dir);
   let index_path_string = format!("{}/index.html", entry_dir);
+  let index_file_name = format!("index");
   let index_path = Path::new(&index_path_string);
   remove_dir_contents(&build_dir);
   copy_assets_to_build(&assets_path_string, &build_dir);
-  build_page(index_path, &build_dir);
+  build_page(index_path, &build_dir, &index_file_name);
 
   // Build pages from pages directory (if it exists)
   let pages_path_string = format!("{}/pages", entry_dir);
@@ -49,9 +50,15 @@ pub fn compile(entry_dir: String, build_dir: String) {
           .to_string()
           .strip_prefix("src/pages/")
           .unwrap()
-          .strip_suffix("index.html")
+          .strip_suffix("/index.html")
           .unwrap()
       );
+      let build_dir_list: Vec<&str> = build_dir.split("/").collect();
+      let page_file_name = build_dir_list.last().unwrap().to_string();
+      let build_dir = build_dir
+        .strip_suffix(&format!("/{}", &page_file_name))
+        .unwrap()
+        .to_string();
       let assets_path_string = format!(
         "{}/assets",
         page_path
@@ -61,33 +68,25 @@ pub fn compile(entry_dir: String, build_dir: String) {
           .strip_suffix("/index.html")
           .unwrap()
       );
-      remove_dir_contents(&build_dir);
+      create_dir(&build_dir);
       copy_assets_to_build(&assets_path_string, &build_dir);
-      build_page(&page_path, &build_dir);
+      build_page(&page_path, &build_dir, &page_file_name);
     }
   }
 
   messages::finished(now.elapsed());
 }
 
-fn build_page(component_path: &Path, build_dir: &String) {
+fn build_page(component_path: &Path, build_dir: &String, file_name: &String) {
   let component_props = BTreeMap::<String, String>::new();
   let (html, css, js) = build_output(&component_path.canonicalize().unwrap(), &component_props);
 
   // Write output CSS if it exists
   if !css.is_empty() {
-    let css_build_path = format!("{}/index.css", build_dir);
+    let css_build_path = format!("{}/{}.css", build_dir, file_name);
     fs::write(css_build_path, css).expect("Unable to write file");
 
-    let build_dir_list: Vec<&str> = build_dir.split("/").collect();
-    let output_build_path: String;
-    if build_dir_list[0] == "." {
-      output_build_path = build_dir_list[2..].join("/");
-    } else {
-      output_build_path = build_dir_list[1..].join("/");
-    }
-
-    let output_build_path = format!("{}index.css", output_build_path);
+    let output_build_path = format!("./{}.css", file_name);
 
     // Add link tag referencing index.css within html
     let mut attrs = BTreeMap::<&str, &str>::new();
@@ -98,19 +97,11 @@ fn build_page(component_path: &Path, build_dir: &String) {
 
   // Write output JS if it exists
   if !js.is_empty() {
-    let js_build_path = format!("{}/index.js", build_dir);
+    let js_build_path = format!("{}/{}.js", build_dir, file_name);
     let js = js::post_process(js);
     fs::write(js_build_path, js).expect("Unable to write file");
 
-    let build_dir_list: Vec<&str> = build_dir.split("/").collect();
-    let output_build_path: String;
-    if build_dir_list[0] == "." {
-      output_build_path = build_dir_list[2..].join("/");
-    } else {
-      output_build_path = build_dir_list[1..].join("/");
-    }
-
-    let output_build_path = format!("{}index.js", output_build_path);
+    let output_build_path = format!("./{}.js", file_name);
 
     // Add script tag referencing index.js within html
     let mut attrs = BTreeMap::<&str, &str>::new();
@@ -120,7 +111,7 @@ fn build_page(component_path: &Path, build_dir: &String) {
   }
 
   // Write output HTML
-  let html_build_path = format!("{}/index.html", build_dir);
+  let html_build_path = format!("{}/{}.html", build_dir, file_name);
   html.serialize_to_file(html_build_path).ok();
 }
 
