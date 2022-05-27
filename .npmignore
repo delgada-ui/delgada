@@ -1,10 +1,39 @@
-target
-Cargo.lock
-.cargo
+# docs
+docs/
+samples/
+CODE_OF_CONDUCT.md
+SECURITY.md
+CONTRIBUTING.md
+
+# tests
+*.spec.*
+coverage/
+
+# scripts
+scripts
+
+# config files
+.vscode
 .github
-npm
+.eslintrc.js
 .eslintrc
+.eslintignore
+.prettierrc
 .prettierignore
-rustfmt.toml
+babel.config.js
+tsconfig.json
+tsconfig.build.json
+tsconfig.eslint.json
+webpack.config.js
+rollup.config.js
+policheck
+azure-pipelines.yml
+api-extractor.json
 yarn.lock
+target
+package-lock.json
 *.node
+npm
+
+# cache
+temp
