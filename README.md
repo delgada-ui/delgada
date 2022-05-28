@@ -16,7 +16,8 @@ Delgada is a frontend web framework for building slim multipage websites using m
 Features include: 
 
 - File-system based routing
-- First-class support for web components––you bring your own framework (or none at all)!
+- Ludicously lightweight––currently less than 200 LOC and no dependencies 🤯
+- Web components as a first class citizen––you bring your own framework (or none at all)!
 - Static markup components and styling using template literal strings
 - Flexible page templates
 - SEO friendly final output
