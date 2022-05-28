@@ -1,4 +1,8 @@
-# Delgada
+<p align="center">
+  <a href="https://delgada.dev" target="_blank" rel="noopener noreferrer">
+    <img style="width: 100%;" src="./docs/assets/banner.png" alt="Delgada logo banner">
+  </a>
+</p>
 
 [![NPM Version](https://img.shields.io/npm/v/delgada?color=blue)](https://www.npmjs.com/package/delgada)
 [![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)](./LICENSE)
