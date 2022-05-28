@@ -30,7 +30,6 @@ To quickly get up and running you can install the [project template](https://git
 npx degit delgada-ui/template my-delgada-project
 cd my-delgada-project
 npm install
-npm run build
 npm start
 ```
 
