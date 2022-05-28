@@ -11,7 +11,15 @@
 
 ## What is Delgada?
 
-Delgada is a small, frontend web compiler that enables developers to write/organize vanilla HTML, CSS, and JavaScript with similar ergonomics and composability to a modern frontend framework.
+Delgada is a frontend web framework for building slim multipage websites using modern web standards and conventions.
+
+Features include: 
+
+- File-system based routing
+- First-class support for web components––you bring your own framework (or none at all)!
+- Static markup components and styling using template literal strings
+- Flexible page templates
+- SEO friendly final output
 
 ## Getting Started
 
