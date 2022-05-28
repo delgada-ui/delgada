@@ -26,7 +26,7 @@ async function main() {
 
 async function buildPages(buildDirectory, pagesDirectory) {
   // TODO: Make template optional
-  const template = await getPageTemplate(pagesDirectory);
+  const [template, templateStyles] = await getPageTemplate(pagesDirectory);
   const files = fs.readdirSync(pagesDirectory);
   for (const file of files) {
     if (file === '_template.js') {
@@ -47,7 +47,7 @@ async function buildPages(buildDirectory, pagesDirectory) {
       );
 
       let pageOutput = template(page(), metadata);
-      pageOutput = addInlineStyles(pageOutput, styles);
+      pageOutput = addInlineStyles(pageOutput, [styles, templateStyles]);
       pageOutput = addWebComponentScriptTags(pageOutput);
       writeToBuildDirectory(pageOutput, buildDirectory, `${pageName}.html`);
     }
@@ -57,18 +57,23 @@ async function buildPages(buildDirectory, pagesDirectory) {
 async function getPageTemplate(pagesDirectory) {
   try {
     const templatePath = `${pagesDirectory}/_template.js`;
-    const { default: template } = await import(templatePath);
-    return template;
+    const { template, styles } = await import(templatePath);
+    return [template, styles];
   } catch (err) {
     console.error(err);
   }
 }
 
 function addInlineStyles(output, styles) {
-  if (styles) {
-    const styleTag = `<style>${styles}</style>`;
-    output = output.replace('</head>', `${styleTag}\n</head>`);
+  let finalStyles = '';
+  for (const style of styles) {
+    if (style) {
+      finalStyles += style;
+    }
   }
+
+  const styleTag = `<style>${finalStyles}</style>`;
+  output = output.replace('</head>', `${styleTag}\n</head>`);
   return output;
 }
 
