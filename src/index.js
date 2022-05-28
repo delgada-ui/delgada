@@ -107,19 +107,6 @@ function getCommandLineArguments() {
       console.error('Invalid command.');
       break;
   }
-
-  // if (command === 'build') {
-  //   let buildDirectoryPath = process.argv[3];
-
-  //   // If the build path is not provided set a default
-  //   if (buildDirectoryPath === undefined) {
-  //     buildDirectoryPath = './build';
-  //   }
-
-  //   return [buildDirectoryPath];
-  // } else {
-  //   throw new Error('Please specify a valid command.');
-  // }
 }
 
 function delDir(path) {
