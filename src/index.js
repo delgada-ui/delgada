@@ -32,6 +32,7 @@ async function buildPages(buildDirectory, pagesDirectory) {
     if (file === '_template.js') {
       continue;
     }
+    // If a nested pages directory exists, recursively build it
     if (fs.lstatSync(`${pagesDirectory}/${file}`).isDirectory()) {
       createDir(`${buildDirectory}/${file}`);
       await buildPages(
@@ -40,40 +41,64 @@ async function buildPages(buildDirectory, pagesDirectory) {
       );
     } else {
       const pageName = file.replace('.js', '');
-      console.log(`Building ${pageName} page...`);
-
-      const { page, styles, metadata } = await import(
-        `${pagesDirectory}/${file}`
+      const pageOutput = await buildPage(
+        file,
+        pageName,
+        pagesDirectory,
+        template,
+        templateStyles
       );
-
-      let pageOutput = template(page(), metadata);
-      pageOutput = addInlineStyles(pageOutput, [styles, templateStyles]);
-      pageOutput = addWebComponentScriptTags(pageOutput);
       writeToBuildDirectory(pageOutput, buildDirectory, `${pageName}.html`);
     }
   }
 }
 
+async function buildPage(
+  file,
+  pageName,
+  pagesDirectory,
+  template,
+  templateStyles
+) {
+  console.log(`Building ${pageName} page...`);
+
+  const {
+    page,
+    styles = '',
+    metadata = {},
+  } = await import(`${pagesDirectory}/${file}`);
+
+  let pageOutput = '';
+  switch (metadata.useTemplate) {
+    case false:
+      pageOutput = page();
+      pageOutput = addInlineStyles(pageOutput, styles);
+      break;
+    default:
+      // When metadata.useTemplate is undefined or set to true,
+      // the template will be used
+      pageOutput = template(page(), metadata);
+      pageOutput = addInlineStyles(pageOutput, styles, templateStyles);
+      break;
+  }
+  pageOutput = addWebComponentScriptTags(pageOutput);
+
+  return pageOutput;
+}
+
 async function getPageTemplate(pagesDirectory) {
   try {
     const templatePath = `${pagesDirectory}/_template.js`;
-    const { template, styles } = await import(templatePath);
+    const { template, styles = '' } = await import(templatePath);
     return [template, styles];
   } catch (err) {
     console.error(err);
   }
 }
 
-function addInlineStyles(output, styles) {
-  let finalStyles = '';
-  for (const style of styles) {
-    if (style) {
-      finalStyles += style;
-    }
-  }
-
-  const styleTag = `<style>${finalStyles}</style>`;
-  output = output.replace('</head>', `${styleTag}\n</head>`);
+function addInlineStyles(output, pageStyles, templateStyles) {
+  const styles = `${pageStyles}${templateStyles}`;
+  output = output.replace('</head>', `<style>${styles}</style>\n</head>`);
   return output;
 }
 
