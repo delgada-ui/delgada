@@ -54,21 +54,29 @@ async function buildPages(buildDirectory, pagesDirectory) {
       switch (metadata.useTemplate) {
         case false:
           pageOutput = page();
+          pageOutput = addStyles(
+            pageOutput,
+            styles,
+            '',
+            metadata.inlineCSS,
+            buildDirectory,
+            pageName
+          );
           break;
         default:
           // When metadata.useTemplate is undefined or set to true,
           // the template will be used
           pageOutput = template(page(), metadata);
+          pageOutput = addStyles(
+            pageOutput,
+            styles,
+            templateStyles,
+            metadata.inlineCSS,
+            buildDirectory,
+            pageName
+          );
           break;
       }
-      pageOutput = addStyles(
-        pageOutput,
-        styles,
-        templateStyles,
-        metadata.inlineCSS,
-        buildDirectory,
-        pageName
-      );
       pageOutput = addWebComponentScriptTags(pageOutput);
       writeToBuildDirectory(pageOutput, buildDirectory, `${pageName}.html`);
     }
