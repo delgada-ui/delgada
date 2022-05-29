@@ -40,50 +40,39 @@ async function buildPages(buildDirectory, pagesDirectory) {
         `${pagesDirectory}/${file}`
       );
     } else {
+      // Otherwise build the page
       const pageName = file.replace('.js', '');
-      const pageOutput = await buildPage(
-        file,
-        pageName,
-        pagesDirectory,
-        template,
-        templateStyles
+      console.log(`Building ${pageName} page...`);
+
+      const {
+        page,
+        styles = '',
+        metadata = {},
+      } = await import(`${pagesDirectory}/${file}`);
+
+      let pageOutput = '';
+      switch (metadata.useTemplate) {
+        case false:
+          pageOutput = page();
+          break;
+        default:
+          // When metadata.useTemplate is undefined or set to true,
+          // the template will be used
+          pageOutput = template(page(), metadata);
+          break;
+      }
+      pageOutput = addStyles(
+        pageOutput,
+        styles,
+        templateStyles,
+        metadata.inlineCSS,
+        buildDirectory,
+        pageName
       );
+      pageOutput = addWebComponentScriptTags(pageOutput);
       writeToBuildDirectory(pageOutput, buildDirectory, `${pageName}.html`);
     }
   }
-}
-
-async function buildPage(
-  file,
-  pageName,
-  pagesDirectory,
-  template,
-  templateStyles
-) {
-  console.log(`Building ${pageName} page...`);
-
-  const {
-    page,
-    styles = '',
-    metadata = {},
-  } = await import(`${pagesDirectory}/${file}`);
-
-  let pageOutput = '';
-  switch (metadata.useTemplate) {
-    case false:
-      pageOutput = page();
-      pageOutput = addInlineStyles(pageOutput, styles);
-      break;
-    default:
-      // When metadata.useTemplate is undefined or set to true,
-      // the template will be used
-      pageOutput = template(page(), metadata);
-      pageOutput = addInlineStyles(pageOutput, styles, templateStyles);
-      break;
-  }
-  pageOutput = addWebComponentScriptTags(pageOutput);
-
-  return pageOutput;
 }
 
 async function getPageTemplate(pagesDirectory) {
@@ -96,9 +85,24 @@ async function getPageTemplate(pagesDirectory) {
   }
 }
 
-function addInlineStyles(output, pageStyles, templateStyles) {
+function addStyles(
+  output,
+  pageStyles,
+  templateStyles,
+  isInlineCSS = true,
+  buildDirectory,
+  pageName
+) {
   const styles = `${pageStyles}${templateStyles}`;
-  output = output.replace('</head>', `<style>${styles}</style>\n</head>`);
+  if (isInlineCSS) {
+    output = output.replace('</head>', `<style>${styles}</style>\n</head>`);
+  } else {
+    writeToBuildDirectory(styles, buildDirectory, `${pageName}.css`);
+    output = output.replace(
+      '</head>',
+      `<link rel="stylesheet" href="./${pageName}.css" />\n</head>`
+    );
+  }
   return output;
 }
 
