@@ -119,14 +119,16 @@ function addStyles(
   pageName
 ) {
   const styles = `${pageStyles}${templateStyles}`;
-  if (isInlineCSS) {
-    output = output.replace('</head>', `<style>${styles}</style>\n</head>`);
-  } else {
-    writeToBuildDirectory(styles, buildDirectory, `${pageName}.css`);
-    output = output.replace(
-      '</head>',
-      `<link rel="stylesheet" href="./${pageName}.css" />\n</head>`
-    );
+  if (styles.length > 0) {
+    if (isInlineCSS) {
+      output = output.replace('</head>', `<style>${styles}</style>\n</head>`);
+    } else {
+      writeToBuildDirectory(styles, buildDirectory, `${pageName}.css`);
+      output = output.replace(
+        '</head>',
+        `<link rel="stylesheet" href="./${pageName}.css" />\n</head>`
+      );
+    }
   }
   return output;
 }
