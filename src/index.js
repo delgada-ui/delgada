@@ -25,7 +25,6 @@ async function main() {
 }
 
 async function buildPages(buildDirectory, pagesDirectory) {
-  // TODO: Make template optional
   const [template, templateStyles] = await getPageTemplate(pagesDirectory);
   const files = fs.readdirSync(pagesDirectory);
   for (const file of files) {
@@ -51,31 +50,45 @@ async function buildPages(buildDirectory, pagesDirectory) {
       } = await import(`${pagesDirectory}/${file}`);
 
       let pageOutput = '';
-      switch (metadata.useTemplate) {
-        case false:
-          pageOutput = page();
-          pageOutput = addStyles(
-            pageOutput,
-            styles,
-            '',
-            metadata.inlineCSS,
-            buildDirectory,
-            pageName
-          );
-          break;
-        default:
-          // When metadata.useTemplate is undefined or set to true,
-          // the template will be used
-          pageOutput = template(page(), metadata);
-          pageOutput = addStyles(
-            pageOutput,
-            styles,
-            templateStyles,
-            metadata.inlineCSS,
-            buildDirectory,
-            pageName
-          );
-          break;
+      if (template) {
+        switch (metadata.useTemplate) {
+          case false:
+            pageOutput = page();
+            pageOutput = addStyles(
+              pageOutput,
+              styles,
+              '',
+              metadata.inlineCSS,
+              buildDirectory,
+              pageName
+            );
+            break;
+          default:
+            // When metadata.useTemplate is undefined or set to true,
+            // the template will be used
+            pageOutput = template(page(), metadata);
+            pageOutput = addStyles(
+              pageOutput,
+              styles,
+              templateStyles,
+              metadata.inlineCSS,
+              buildDirectory,
+              pageName
+            );
+            break;
+        }
+      } else {
+        // If a _template.js file does not exist in the given
+        // directory, build page output without it
+        pageOutput = page();
+        pageOutput = addStyles(
+          pageOutput,
+          styles,
+          '',
+          metadata.inlineCSS,
+          buildDirectory,
+          pageName
+        );
       }
       pageOutput = addWebComponentScriptTags(pageOutput);
       writeToBuildDirectory(pageOutput, buildDirectory, `${pageName}.html`);
@@ -84,8 +97,12 @@ async function buildPages(buildDirectory, pagesDirectory) {
 }
 
 async function getPageTemplate(pagesDirectory) {
+  const templatePath = `${pagesDirectory}/_template.js`;
+  if (!fs.existsSync(templatePath)) {
+    return [undefined, ''];
+  }
+
   try {
-    const templatePath = `${pagesDirectory}/_template.js`;
     const { template, styles = '' } = await import(templatePath);
     return [template, styles];
   } catch (err) {
@@ -102,14 +119,16 @@ function addStyles(
   pageName
 ) {
   const styles = `${pageStyles}${templateStyles}`;
-  if (isInlineCSS) {
-    output = output.replace('</head>', `<style>${styles}</style>\n</head>`);
-  } else {
-    writeToBuildDirectory(styles, buildDirectory, `${pageName}.css`);
-    output = output.replace(
-      '</head>',
-      `<link rel="stylesheet" href="./${pageName}.css" />\n</head>`
-    );
+  if (styles.length > 0) {
+    if (isInlineCSS) {
+      output = output.replace('</head>', `<style>${styles}</style>\n</head>`);
+    } else {
+      writeToBuildDirectory(styles, buildDirectory, `${pageName}.css`);
+      output = output.replace(
+        '</head>',
+        `<link rel="stylesheet" href="./${pageName}.css" />\n</head>`
+      );
+    }
   }
   return output;
 }
