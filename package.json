@@ -1,7 +1,7 @@
 {
   "name": "delgada",
   "version": "0.5.0",
-  "description": "A frontend web compiler for building slim UIs.",
+  "description": "A frontend web framework for building slim UIs.",
   "author": "Hawk Ticehurst <hawkticehurst@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/delgada-ui/delgada#readme",
@@ -21,6 +21,10 @@
     "./template.js": {
       "default": "./src/template.js"
     }
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "marked": "^4.0.16"
   },
   "devDependencies": {
     "prettier": "^2.4.1"
