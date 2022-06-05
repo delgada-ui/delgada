@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import path from 'path';
+import { marked } from 'marked';
+import yaml from 'js-yaml';
 
 async function main() {
   console.time('Build');
@@ -27,59 +29,119 @@ async function main() {
 async function buildPages(buildDirectory, pagesDirectory) {
   const [template, templateStyles] = await getPageTemplate(pagesDirectory);
   const files = fs.readdirSync(pagesDirectory);
+
   for (const file of files) {
     if (file === '_template.js') {
       continue;
     }
+
+    const fileExtension = path.extname(file);
+    const currFilePath = `${pagesDirectory}/${file}`;
+
     // If a nested pages directory exists, recursively build it
-    if (fs.lstatSync(`${pagesDirectory}/${file}`).isDirectory()) {
+    if (fs.lstatSync(`${currFilePath}`).isDirectory()) {
       createDir(`${buildDirectory}/${file}`);
-      await buildPages(
-        `${buildDirectory}/${file}`,
-        `${pagesDirectory}/${file}`
-      );
+      await buildPages(`${buildDirectory}/${file}`, `${currFilePath}`);
     } else {
       // Otherwise build the page
-      const pageName = file.replace('.js', '');
-      console.log(`Building ${pageName} page...`);
-
-      const {
-        page,
-        styles = '',
-        metadata = {},
-      } = await import(`${pagesDirectory}/${file}`);
-
-      let pageOutput = '';
-      if (template) {
-        switch (metadata.useTemplate) {
-          case false:
-            pageOutput = page();
-            pageOutput = addStyles(
-              pageOutput,
-              styles,
-              '',
-              metadata.inlineCSS,
-              buildDirectory,
-              pageName
-            );
-            break;
-          default:
-            // When metadata.useTemplate is undefined or set to true,
-            // the template will be used
-            pageOutput = template(page(), metadata);
-            pageOutput = addStyles(
-              pageOutput,
-              styles,
-              templateStyles,
-              metadata.inlineCSS,
-              buildDirectory,
-              pageName
-            );
-            break;
-        }
+      if (fileExtension === '.md') {
+        buildMarkdownPage(
+          file,
+          currFilePath,
+          template,
+          templateStyles,
+          buildDirectory
+        );
       } else {
-        // If a _template.js file does not exist in the given
-        // directory, build page output without it
+        await buildJavaScriptPage(
+          file,
+          currFilePath,
+          template,
+          templateStyles,
+          buildDirectory
+        );
+      }
+    }
+  }
+}
+
+function buildMarkdownPage(
+  file,
+  currFilePath,
+  template,
+  templateStyles,
+  buildDirectory
+) {
+  const pageName = file.replace('.md', '');
+  console.log(`Building ${pageName} page...`);
+
+  const markdown = fs.readFileSync(`${currFilePath}`, 'utf8');
+  const metadata = parseMarkdownMetadata(markdown);
+  const styles = metadata.styles || '';
+  // TODO: Bug where markdown horizontal rules are not rendered
+  const html = marked.parse(markdown.replace(/^---$.*^---$/ms, ''));
+
+  let pageOutput = '';
+  if (template) {
+    switch (metadata.useTemplate) {
+      case false:
+        pageOutput = html;
+        pageOutput = addStyles(
+          pageOutput,
+          styles,
+          '',
+          metadata.inlineCSS,
+          buildDirectory,
+          pageName
+        );
+        break;
+      default:
+        // When metadata.useTemplate is undefined or set to true,
+        // the template will be used
+        pageOutput = template(html, metadata);
+        pageOutput = addStyles(
+          pageOutput,
+          styles,
+          templateStyles,
+          metadata.inlineCSS,
+          buildDirectory,
+          pageName
+        );
+        break;
+    }
+  } else {
+    // If a _template.js file does not exist in the given
+    // directory, build page output without it
+    pageOutput = html;
+    pageOutput = addStyles(
+      pageOutput,
+      styles,
+      '',
+      metadata.inlineCSS,
+      buildDirectory,
+      pageName
+    );
+  }
+  pageOutput = addWebComponentScriptTags(pageOutput);
+  writeToBuildDirectory(pageOutput, buildDirectory, `${pageName}.html`);
+}
+
+async function buildJavaScriptPage(
+  file,
+  currFilePath,
+  template,
+  templateStyles,
+  buildDirectory
+) {
+  const pageName = file.replace('.js', '');
+  console.log(`Building ${pageName} page...`);
+
+  const { page, styles = '', metadata = {} } = await import(`${currFilePath}`);
+
+  let pageOutput = '';
+  if (template) {
+    switch (metadata.useTemplate) {
+      case false:
         pageOutput = page();
         pageOutput = addStyles(
           pageOutput,
@@ -89,11 +151,36 @@ async function buildPages(buildDirectory, pagesDirectory) {
           buildDirectory,
           pageName
         );
-      }
-      pageOutput = addWebComponentScriptTags(pageOutput);
-      writeToBuildDirectory(pageOutput, buildDirectory, `${pageName}.html`);
+        break;
+      default:
+        // When metadata.useTemplate is undefined or set to true,
+        // the template will be used
+        pageOutput = template(page(), metadata);
+        pageOutput = addStyles(
+          pageOutput,
+          styles,
+          templateStyles,
+          metadata.inlineCSS,
+          buildDirectory,
+          pageName
+        );
+        break;
     }
+  } else {
+    // If a _template.js file does not exist in the given
+    // directory, build page output without it
+    pageOutput = page();
+    pageOutput = addStyles(
+      pageOutput,
+      styles,
+      '',
+      metadata.inlineCSS,
+      buildDirectory,
+      pageName
+    );
   }
+  pageOutput = addWebComponentScriptTags(pageOutput);
+  writeToBuildDirectory(pageOutput, buildDirectory, `${pageName}.html`);
 }
 
 async function getPageTemplate(pagesDirectory) {
@@ -106,7 +193,7 @@ async function getPageTemplate(pagesDirectory) {
     const { template, styles = '' } = await import(templatePath);
     return [template, styles];
   } catch (err) {
-    console.error(err);
+    throw err;
   }
 }
 
@@ -156,6 +243,30 @@ function writeToBuildDirectory(output, buildDirectory, file) {
 }
 
 // General utilities
+
+/**
+ *
+ * @param {string} markdown
+ * @returns
+ */
+function parseMarkdownMetadata(markdown) {
+  const pattern =
+    /(^-{3}(?:\r\n|\r|\n)([\w\W]*?)-{3}(?:\r\n|\r|\n))?([\w\W]*)*/;
+
+  let metadata = {};
+  const matches = markdown.match(pattern);
+
+  if (matches[2]) {
+    const parse = yaml.load;
+    try {
+      metadata = parse(matches[2]) || {};
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  return metadata;
+}
 
 function getCommandLineArguments() {
   const command = process.argv[2];
