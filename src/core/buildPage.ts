@@ -1,64 +1,60 @@
+import fs from 'fs';
+import { marked } from 'marked';
 import { writeFile } from './dir.js';
 import { addStyles } from './styles.js';
 import { addWebComponentScriptTags } from './webComponents.js';
+import { parseMarkdownMetadata } from './markdown.js';
 
 export async function buildPage(
   buildDirectory: string,
-  pagesDirectory: string,
-  file: string,
+  currFilePath: string,
+  pageName: string,
+  fileExtension: string,
   template: any,
   templateStyles: string
 ) {
-  const pageName = file.replace('.js', '');
-  console.log(`Building ${pageName} page...`);
+  let pageHtml = '';
+  let pageStyles = '';
+  let pageMetadata: any = {};
 
-  const {
-    page,
-    styles = '',
-    metadata = {},
-  } = await import(`${pagesDirectory}/${file}`);
+  if (fileExtension === '.js') {
+    const {
+      page,
+      styles = '',
+      metadata = {},
+    } = await import(`${currFilePath}`);
+    pageHtml = page();
+    pageStyles = styles;
+    pageMetadata = metadata;
+  } else {
+    const markdown = fs.readFileSync(`${currFilePath}`, 'utf8');
+    pageMetadata = parseMarkdownMetadata(markdown);
+    pageStyles = pageMetadata.styles || '';
+    // TODO: Bug where markdown horizontal rules are not rendered
+    pageHtml = marked.parse(markdown.replace(/^---$.*^---$/ms, ''));
+  }
 
   let pageOutput = '';
-  if (template) {
-    switch (metadata.useTemplate) {
-      case false:
-        pageOutput = page();
-        pageOutput = addStyles(
-          pageOutput,
-          styles,
-          '',
-          metadata.inlineCSS,
-          buildDirectory,
-          pageName
-        );
-        break;
-      default:
-        // When metadata.useTemplate is undefined or set to true,
-        // the template will be used
-        pageOutput = template(page(), metadata);
-        pageOutput = addStyles(
-          pageOutput,
-          styles,
-          templateStyles,
-          metadata.inlineCSS,
-          buildDirectory,
-          pageName
-        );
-        break;
-    }
-  } else {
+  if (!template || pageMetadata.useTemplate === false) {
     // If a _template.js file does not exist in the given
-    // directory, build page output without it
-    pageOutput = page();
-    pageOutput = addStyles(
-      pageOutput,
-      styles,
-      '',
-      metadata.inlineCSS,
-      buildDirectory,
-      pageName
-    );
+    // directory or the useTemplate config is set to false,
+    // build page output without it
+    pageOutput = pageHtml;
+    templateStyles = '';
+  } else {
+    // When metadata.useTemplate is undefined or set to true,
+    // the template will be used
+    pageOutput = template(pageHtml, pageMetadata);
   }
+
+  pageOutput = addStyles(
+    pageOutput,
+    pageStyles,
+    templateStyles,
+    pageMetadata.inlineCSS,
+    buildDirectory,
+    pageName
+  );
   pageOutput = addWebComponentScriptTags(pageOutput);
   writeFile(`${buildDirectory}/${pageName}.html`, pageOutput);
 }

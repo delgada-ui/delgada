@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import { delDir, createDir, copyDir } from '../core/dir.js';
 import { buildPage } from '../core/buildPage.js';
 import { getPageTemplate } from '../core/pageTemplate.js';
@@ -31,15 +32,38 @@ async function buildPages(buildDirectory: string, pagesDirectory: string) {
     if (file === '_template.js') {
       continue;
     }
+
+    const currFilePath = `${pagesDirectory}/${file}`;
+
     // If a nested pages directory exists, recursively build it
-    if (fs.lstatSync(`${pagesDirectory}/${file}`).isDirectory()) {
+    if (fs.lstatSync(`${currFilePath}`).isDirectory()) {
       createDir(`${buildDirectory}/${file}`);
-      await buildPages(
-        `${buildDirectory}/${file}`,
-        `${pagesDirectory}/${file}`
-      );
+      await buildPages(`${buildDirectory}/${file}`, `${currFilePath}`);
     } else {
-      buildPage(buildDirectory, pagesDirectory, file, template, templateStyles);
+      const fileExtension = path.extname(file);
+      let pageName = '';
+      switch (fileExtension) {
+        case '.js':
+          pageName = file.replace('.js', '');
+          break;
+        case '.md':
+          pageName = file.replace('.md', '');
+          break;
+        default:
+          throw new Error(
+            `Invalid page file type: ${fileExtension}. Must be a .js or .md file.`
+          );
+      }
+
+      console.log(`Building ${pageName} page...`);
+      buildPage(
+        buildDirectory,
+        currFilePath,
+        pageName,
+        fileExtension,
+        template,
+        templateStyles
+      );
     }
   }
 }
