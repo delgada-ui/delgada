@@ -1,4 +1,4 @@
-export function html(strings: string[], ...values: any[]) {
+export function html(strings: TemplateStringsArray, ...values: any[]) {
   const parts = [strings[0]];
 
   for (let i = 0; i < values.length; i++) {
