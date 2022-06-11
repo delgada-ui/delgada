@@ -12,20 +12,14 @@
   "bugs": {
     "url": "https://github.com/delgada-ui/delgada/issues"
   },
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "bin": {
-    "delgada": "dist/index.js"
-  },
-  "exports": {
-    "./template.js": {
-      "types": "./dist/template.d.ts",
-      "default": "./dist/template.js"
-    },
-    "./package.json": "./package.json"
+    "delgada": "dist/cli/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf ./dist && tsc",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
