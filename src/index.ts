@@ -24,7 +24,7 @@ async function main() {
   console.log('\n✨ Build complete! ✨');
 }
 
-async function buildPages(buildDirectory, pagesDirectory) {
+async function buildPages(buildDirectory: string, pagesDirectory: string) {
   const [template, templateStyles] = await getPageTemplate(pagesDirectory);
   const files = fs.readdirSync(pagesDirectory);
   for (const file of files) {
@@ -96,7 +96,7 @@ async function buildPages(buildDirectory, pagesDirectory) {
   }
 }
 
-async function getPageTemplate(pagesDirectory) {
+async function getPageTemplate(pagesDirectory: string): Promise<[any, string]> {
   const templatePath = `${pagesDirectory}/_template.js`;
   if (!fs.existsSync(templatePath)) {
     return [undefined, ''];
@@ -107,16 +107,17 @@ async function getPageTemplate(pagesDirectory) {
     return [template, styles];
   } catch (err) {
     console.error(err);
+    return [undefined, ''];
   }
 }
 
 function addStyles(
-  output,
-  pageStyles,
-  templateStyles,
+  output: string,
+  pageStyles: string,
+  templateStyles: string,
   isInlineCSS = true,
-  buildDirectory,
-  pageName
+  buildDirectory: string,
+  pageName: string
 ) {
   const styles = `${pageStyles}${templateStyles}`;
   if (styles.length > 0) {
@@ -133,7 +134,7 @@ function addStyles(
   return output;
 }
 
-function addWebComponentScriptTags(output) {
+function addWebComponentScriptTags(output: string) {
   const wcFiles = fs.readdirSync('build/wc');
   for (const file of wcFiles) {
     const wcName = file.replace('.js', '');
@@ -146,7 +147,11 @@ function addWebComponentScriptTags(output) {
   return output;
 }
 
-function writeToBuildDirectory(output, buildDirectory, file) {
+function writeToBuildDirectory(
+  output: string,
+  buildDirectory: string,
+  file: string
+) {
   fs.appendFile(`${buildDirectory}/${file}`, output, (err) => {
     if (err) {
       console.error(err);
@@ -166,13 +171,13 @@ function getCommandLineArguments() {
       return [buildDirectoryPath];
     default:
       console.error('Invalid command.');
-      break;
+      return [];
   }
 }
 
-function delDir(path) {
+function delDir(path: string) {
   if (fs.existsSync(path) && fs.lstatSync(path).isDirectory()) {
-    fs.readdirSync(path).forEach(function (file, index) {
+    fs.readdirSync(path).forEach(function (file) {
       const currPath = path + '/' + file;
       if (fs.lstatSync(currPath).isDirectory()) {
         delDir(currPath);
@@ -184,13 +189,13 @@ function delDir(path) {
   }
 }
 
-function createDir(dir) {
+function createDir(dir: string) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
 }
 
-function copyDir(source, target) {
+function copyDir(source: string, target: string) {
   if (fs.existsSync(source)) {
     let files = [];
 
@@ -208,14 +213,14 @@ function copyDir(source, target) {
         if (fs.lstatSync(curSource).isDirectory()) {
           copyDir(curSource, targetFolder);
         } else {
-          copyFileSync(curSource, targetFolder);
+          copyFile(curSource, targetFolder);
         }
       });
     }
   }
 }
 
-function copyFileSync(source, target) {
+function copyFile(source: string, target: string) {
   let targetFile = target;
 
   // If target is a directory, a new file with the same name will be created
