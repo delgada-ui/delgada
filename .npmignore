@@ -6,6 +6,9 @@ CODE_OF_CONDUCT.md
 SECURITY.md
 CONTRIBUTING.md
 
+# source code
+src/
+
 # tests
 *.spec.*
 coverage/
@@ -23,12 +26,9 @@ scripts
 .prettierignore
 babel.config.js
 tsconfig.json
-tsconfig.build.json
-tsconfig.eslint.json
+tsconfig.*.json
 webpack.config.js
 rollup.config.js
-policheck
-azure-pipelines.yml
 api-extractor.json
 yarn.lock
 target
