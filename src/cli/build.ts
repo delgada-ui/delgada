@@ -1,24 +1,22 @@
 import fs from 'fs';
 import path from 'path';
-import { delDir, createDir, copyDir } from '../core/dir.js';
+import { delDir, createDir, copyDirContents } from '../core/dir.js';
 import { buildPage } from '../core/buildPage.js';
 import { getPageTemplate } from '../core/pageTemplate.js';
 
-export async function build(buildDirectory: string) {
+export async function build() {
   const startTime = performance.now();
-  const publicDirectory = 'public';
+  const cwd = process.cwd();
+  const buildDirectory = `${cwd}/build`;
+  const publicDirectory = `${cwd}/public`;
+  const wcDirectory = `${cwd}/src/components/wc`;
+  const pagesDirectory = `${cwd}/src/pages`;
 
-  // Clear the build directory if it exists and
-  // create a new build directory if it does not
   delDir(buildDirectory);
   createDir(buildDirectory);
+  copyDirContents(publicDirectory, buildDirectory);
+  copyDirContents(wcDirectory, buildDirectory);
 
-  // Copy the public and web components directories
-  // to the build directory if they exist
-  copyDir(publicDirectory, buildDirectory);
-  copyDir('src/components/wc', buildDirectory);
-
-  const pagesDirectory = `${process.cwd()}/src/pages`;
   await buildPages(buildDirectory, pagesDirectory);
 
   const buildTime = (performance.now() - startTime).toFixed(3);
@@ -56,7 +54,7 @@ async function buildPages(buildDirectory: string, pagesDirectory: string) {
       }
 
       console.log(`Building ${pageName} page...`);
-      buildPage(
+      await buildPage(
         buildDirectory,
         currFilePath,
         pageName,

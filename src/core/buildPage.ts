@@ -2,7 +2,7 @@ import fs from 'fs';
 import { marked } from 'marked';
 import { writeFile } from './dir.js';
 import { addStyles } from './styles.js';
-import { addWebComponentScriptTags } from './webComponents.js';
+import { addWebComponents } from './webComponents.js';
 import { parseMarkdownMetadata } from './markdown.js';
 
 export async function buildPage(
@@ -55,6 +55,6 @@ export async function buildPage(
     buildDirectory,
     pageName
   );
-  pageOutput = addWebComponentScriptTags(pageOutput);
+  pageOutput = addWebComponents(pageOutput);
   writeFile(`${buildDirectory}/${pageName}.html`, pageOutput);
 }
