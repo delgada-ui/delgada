@@ -55,6 +55,23 @@ export function copyDir(source: string, target: string) {
   }
 }
 
+export function copyDirContents(source: string, target: string) {
+  if (fs.existsSync(source)) {
+    let files = [];
+    if (fs.lstatSync(source).isDirectory()) {
+      files = fs.readdirSync(source);
+      files.forEach(function (file) {
+        const curSource = path.join(source, file);
+        if (fs.lstatSync(curSource).isDirectory()) {
+          copyDir(curSource, target);
+        } else {
+          copyFile(curSource, target);
+        }
+      });
+    }
+  }
+}
+
 export function copyFile(source: string, target: string) {
   let targetFile = target;
 

@@ -5,8 +5,7 @@ async function main() {
   const command = process.argv[2];
   switch (command) {
     case 'build':
-      let buildDirectoryPath = process.argv[3] ? process.argv[3] : './build';
-      build(buildDirectoryPath);
+      await build();
       break;
     default:
       console.error('Invalid command.');
