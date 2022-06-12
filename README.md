@@ -17,7 +17,7 @@ Features include:
 
 - File-system based routing
 - Create pages using JavaScript or Markdown
-- Web components as a first class citizen – bring your own framework (or none at all)!
+- Web components as a first class citizen
 - Single file static components
 - Flexible page templates
 - SEO friendly final build
