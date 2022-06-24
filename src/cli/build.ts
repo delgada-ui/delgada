@@ -5,7 +5,7 @@ import { buildPage } from '../core/buildPage.js';
 import { getPageTemplate } from '../core/pageTemplate.js';
 
 export async function build() {
-  const startTime = performance.now();
+  console.time('✨ Build complete in');
   const cwd = process.cwd();
   const buildDirectory = `${cwd}/build`;
   const publicDirectory = `${cwd}/public`;
@@ -19,8 +19,8 @@ export async function build() {
 
   await buildPages(buildDirectory, pagesDirectory);
 
-  const buildTime = (performance.now() - startTime).toFixed(3);
-  console.log(`\n✨ Build complete (in ${buildTime}ms)! ✨`);
+  console.log();
+  console.timeEnd('✨ Build complete in');
 }
 
 async function buildPages(buildDirectory: string, pagesDirectory: string) {
