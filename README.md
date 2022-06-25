@@ -11,7 +11,7 @@
 
 ## What is Delgada?
 
-Delgada is a frontend web framework for building slim multipage websites using modern web standards and conventions.
+Delgada is a web framework for building slim multipage websites using modern web standards and conventions.
 
 Features include:
 
