@@ -21,7 +21,8 @@ Features include:
 - Markdown support out of the box
 - TypeScript support out of the box _(coming soon-ish)_
 - Scoped CSS support out of the box _(coming soon-ish)_
-- Zero config necessary with common sense defaults
+- SSR support out of the box _(coming soon-ish)_
+- Zero config with common sense defaults
 
 ## Getting Started
 
