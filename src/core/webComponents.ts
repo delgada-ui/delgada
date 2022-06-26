@@ -7,7 +7,9 @@ export function addWebComponents(output: string) {
     const fileExtension = path.extname(file);
     if (fileExtension === '.js') {
       const wcName = file.replace('.js', '');
-      if (output.includes(`<${wcName}>`) && output.includes(`</${wcName}>`)) {
+      // Developer note: When checking for an opening tag, we leave out the 
+      // closing alligator (`>`) because the web component might include attributes.
+      if (output.includes(`<${wcName}`) && output.includes(`</${wcName}>`)) {
         const wcScript = `<script type="module" src="/${file}"></script>`;
         output = output.replace(`</head>`, `${wcScript}\n</head>`);
       }
