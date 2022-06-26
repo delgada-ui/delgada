@@ -1,6 +1,6 @@
 {
   "name": "delgada",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "A frontend web framework for building slim UIs.",
   "author": "Hawk Ticehurst <hawkticehurst@gmail.com>",
   "license": "MIT",
