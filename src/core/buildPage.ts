@@ -3,6 +3,7 @@ import { marked } from 'marked';
 import { writeFile } from './dir.js';
 import { addStyles } from './styles.js';
 import { addWebComponents } from './webComponents.js';
+import { addScripts } from './scripts.js';
 import { parseMarkdownMetadata } from './markdown.js';
 
 export async function buildPage(
@@ -56,5 +57,6 @@ export async function buildPage(
     pageName
   );
   pageOutput = addWebComponents(pageOutput);
+  pageOutput = addScripts(pageOutput, pageMetadata.scripts);
   writeFile(`${buildDirectory}/${pageName}.html`, pageOutput);
 }
