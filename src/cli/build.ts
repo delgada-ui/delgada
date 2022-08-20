@@ -9,13 +9,13 @@ export async function build() {
   const cwd = process.cwd();
   const buildDirectory = `${cwd}/build`;
   const publicDirectory = `${cwd}/public`;
-  const wcDirectory = `${cwd}/src/components/wc`;
+  const islandsDirectory = `${cwd}/src/components/islands`;
   const pagesDirectory = `${cwd}/src/pages`;
 
   delDir(buildDirectory);
   createDir(buildDirectory);
   copyDirContents(publicDirectory, buildDirectory);
-  copyDirContents(wcDirectory, buildDirectory);
+  copyDirContents(islandsDirectory, buildDirectory);
 
   await buildPages(buildDirectory, pagesDirectory);
 
@@ -42,10 +42,10 @@ async function buildPages(buildDirectory: string, pagesDirectory: string) {
       let pageName = '';
       switch (fileExtension) {
         case '.js':
-          pageName = file.replace('.js', '');
+          pageName = file.replace('.js', '').toLowerCase();
           break;
         case '.md':
-          pageName = file.replace('.md', '');
+          pageName = file.replace('.md', '').toLowerCase();
           break;
         default:
           throw new Error(
