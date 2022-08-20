@@ -42,10 +42,10 @@ async function buildPages(buildDirectory: string, pagesDirectory: string) {
       let pageName = '';
       switch (fileExtension) {
         case '.js':
-          pageName = file.replace('.js', '');
+          pageName = file.replace('.js', '').toLowerCase();
           break;
         case '.md':
-          pageName = file.replace('.md', '');
+          pageName = file.replace('.md', '').toLowerCase();
           break;
         default:
           throw new Error(
