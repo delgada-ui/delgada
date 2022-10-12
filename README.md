@@ -11,17 +11,15 @@
 
 ## What is Delgada?
 
-Delgada is a web framework for building slim multipage websites using modern web standards and conventions.
+Delgada is an HTML-first web framework for building slim multipage websites using modern web standards and conventions.
 
 Features include:
 
-- Ship zero JS by default with static components
+- Ship zero JS to the client by default with static components
 - Islands of interactivity with web components
 - File-system based routing
 - Markdown support out of the box
-- TypeScript support out of the box _(coming soon-ish)_
 - Scoped CSS support out of the box _(coming soon-ish)_
-- SSR support out of the box _(coming soon-ish)_
 - Zero config with common sense defaults
 
 ## Getting Started
